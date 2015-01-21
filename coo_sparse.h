@@ -5,8 +5,8 @@
 #define T coo_matrix_T
 typedef struct T *T;
 
-#define coo_matrix_original_size(A)         (A->orig_size)
-#define coo_matrix_non_zero_elemets(A)      (A->nz)
+#define coo_matrix_get_original_size(A)     (A->orig_size)
+#define coo_matrix_get_non_zero_elements(A) (A->nz)
 #define coo_matrix_get_value(A, i)          (A->val[i])
 #define coo_matrix_get_column_index(A, i)   (A->col_ind[i])
 #define coo_matrix_get_row_index(A, i)      (A->row_ind[i])

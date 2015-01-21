@@ -83,7 +83,7 @@ void coo_matrix_vector_mul(const T A,
 {
     assert(A);
 
-    for (size_t i = 0; i < coo_matrix_non_zero_elemets(A); i++) {
+    for (size_t i = 0; i < coo_matrix_get_non_zero_elements(A); i++) {
         register size_t row_ind = coo_matrix_get_row_index(A, i);
         register size_t col_ind = coo_matrix_get_column_index(A, i);
         register double value   = coo_matrix_get_value(A, i);
