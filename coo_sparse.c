@@ -18,9 +18,9 @@ struct T {
 };
 
 
-T *coo_matrix_new(size_t orig_size, size_t nz)
+T coo_matrix_new(size_t orig_size, size_t nz)
 {
-    T *ret = malloc(sizeof(T));
+    T ret = malloc(sizeof(struct T));
 
     register size_t bytes = nz * sizeof(size_t);
     ret->val = malloc(nz * sizeof(double));
@@ -39,7 +39,7 @@ T *coo_matrix_new(size_t orig_size, size_t nz)
 }
 
 
-void coo_matrix_init_values(T *A, double *val)
+void coo_matrix_init_values(T A, double *val)
 {
     assert(A);
     assert(val);
@@ -48,7 +48,7 @@ void coo_matrix_init_values(T *A, double *val)
 }
 
 
-void coo_matrix_init_columns(T *A, size_t *col)
+void coo_matrix_init_columns(T A, size_t *col)
 {
     assert(A);
     assert(col);
@@ -57,7 +57,7 @@ void coo_matrix_init_columns(T *A, size_t *col)
 }
 
 
-void coo_matrix_init_rows(T *A, size_t *row)
+void coo_matrix_init_rows(T A, size_t *row)
 {
     assert(A);
     assert(row);
@@ -66,7 +66,7 @@ void coo_matrix_init_rows(T *A, size_t *row)
 }
 
 
-void coo_matrix_delete(T *A)
+void coo_matrix_delete(T A)
 {
     assert(A);
 
@@ -77,7 +77,7 @@ void coo_matrix_delete(T *A)
 }
 
 
-void coo_matrix_vector_mul(const T *A,
+void coo_matrix_vector_mul(const T A,
                            const double *x,
                            double *y)
 {

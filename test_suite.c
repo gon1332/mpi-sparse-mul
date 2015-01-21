@@ -10,7 +10,7 @@ void test_suite(void)
     {
         size_t size = 3;
         size_t nz = 3;
-        coo_matrix_T *test = coo_matrix_new(size, nz);
+        coo_matrix_T test = coo_matrix_new(size, nz);
 
         double val[3]     = {1., 2., 3.};
         size_t col_ind[3] = {0,  2,  2};
@@ -39,7 +39,7 @@ void test_suite(void)
     {
         size_t size = 8;
         size_t nz = 14;
-        coo_matrix_T *test = coo_matrix_new(size, nz);
+        coo_matrix_T test = coo_matrix_new(size, nz);
 
         double val[14]     = {6., 9., 4., 4., 5., 3., 5., 8., 6., 5., 4., 3., 2., 2.};
         size_t col_ind[14] = {0,  2,  5,  5,  1,  2,  3,  4,  4,  5,  5,  6,  6,  7};
