@@ -7,7 +7,7 @@
 
 /*! \brief Matrix in triplet form using COO scheme.
  *
- * ========================================================================= */
+ */
 struct T {
     double *val;
     size_t *col_ind;

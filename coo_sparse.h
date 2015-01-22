@@ -2,6 +2,11 @@
 #define COO_SPARSE_H_7EUNGWRE
 #include <stdlib.h> // for size_t
 
+/*!
+ * \file coo_sparse.h
+ * \brief Function prototypes for COO.
+ */
+
 #define T coo_matrix_T
 typedef struct T *T;
 
@@ -16,15 +21,15 @@ typedef struct T *T;
  *
  * \param nz Number of non-zero elements
  * \return Pointer to the triplet form
- * ========================================================================= */
+ */
 extern T coo_matrix_new(size_t orig_size, size_t nz);
 
 
-/*! \brief Initialize the value array of the triplet.
+/*! \brief Initializes the value array of the triplet.
  *
  * \param A Sparse matrix in triplet COO scheme
  * \param val Pointer to the value array
- * ========================================================================= */
+ */
 extern void coo_matrix_init_values(T A, double *val);
 
 
@@ -32,7 +37,7 @@ extern void coo_matrix_init_values(T A, double *val);
  *
  * \param A Sparse matrix in triplet COO scheme
  * \param val Pointer to the column index array
- * ========================================================================= */
+ */
 extern void coo_matrix_init_columns(T A, size_t *col);
 
 
@@ -40,14 +45,14 @@ extern void coo_matrix_init_columns(T A, size_t *col);
  *
  * \param A Sparse matrix in triplet COO scheme
  * \param val Pointer to the row index array
- * ========================================================================= */
+ */
 extern void coo_matrix_init_rows(T A, size_t *row);
 
 
 /*! \brief Delete the given sparse matrix which uses the COO scheme.
  *
  * \param A Sparse matrix in triplet COO scheme
- * ========================================================================= */
+ */
 extern void coo_matrix_delete(T A);
 
 
@@ -56,7 +61,7 @@ extern void coo_matrix_delete(T A);
  * \param A Input matrix
  * \param x Input vactor
  * \param y Result of A*x
- * ========================================================================= */
+ */
 extern void coo_matrix_vector_mul(const T A,
                                   const double *x,
                                   double *y);
