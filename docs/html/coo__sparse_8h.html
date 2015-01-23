@@ -270,11 +270,14 @@ Functions</h2></td></tr>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">A</td><td>Sparse matrix in triplet COO scheme </td></tr>
-    <tr><td class="paramname">val</td><td>Pointer to the value array </td></tr>
+    <tr><td class="paramname">val</td><td>Pointer to the value array</td></tr>
   </table>
   </dd>
 </dl>
-
+<p>Usage: </p><div class="fragment"><div class="line"><span class="comment">// For an allocated matrix cm with 10 non-zero values:</span></div>
+<div class="line"><span class="keywordtype">double</span> values[10] = { 1., 34., 21., 65.43, 0., 74.2, 0.3, 8., 19.2 };</div>
+<div class="line"><a class="code" href="coo__sparse_8h.html#ab259b22d7bd58c8fccd372079406bd05">coo_matrix_init_values</a>(cm, values);</div>
+</div><!-- fragment --> 
 </div>
 </div>
 <a class="anchor" id="ad0682ee49d67c0e273ddd69d551d9eba"></a>
@@ -304,11 +307,17 @@ Functions</h2></td></tr>
 <p>Creates a matrix in a triplet form according to COO scheme. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
+    <tr><td class="paramname">orig_size</td><td>The dimension of the original square matrix </td></tr>
     <tr><td class="paramname">nz</td><td>Number of non-zero elements </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>Pointer to the triplet form </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>Pointer to the coo_matrix created</dd></dl>
+<p>Usage: </p><div class="fragment"><div class="line">coo_matrix_T cm;</div>
+<div class="line">cm = <a class="code" href="coo__sparse_8h.html#ad0682ee49d67c0e273ddd69d551d9eba">coo_matrix_new</a>(50, 3);</div>
+</div><!-- fragment --><p>Creates a new matrix by allocating memory and initializing values of the structure fields.</p>
+<p>COO format was chosen for the needs of a project for the lesson <em>Parallel and Distributed Computation</em>.</p>
+<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000001">Todo:</a></b></dt><dd>Embed the custom malloc checking mechanism <code>Safecall</code>.</dd></dl>
 
 </div>
 </div>
@@ -347,7 +356,7 @@ Functions</h2></td></tr>
   <table class="params">
     <tr><td class="paramname">A</td><td>Input matrix </td></tr>
     <tr><td class="paramname">x</td><td>Input vactor </td></tr>
-    <tr><td class="paramname">y</td><td>Result of A*x </td></tr>
+    <tr><td class="paramname">y</td><td>Result of <img class="formulaInl" alt="$ A*x $" src="form_0.png"/> </td></tr>
   </table>
   </dd>
 </dl>
@@ -357,7 +366,7 @@ Functions</h2></td></tr>
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Thu Jan 22 2015 15:58:46 for My Project by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Fri Jan 23 2015 01:08:25 for My Project by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.9.1
 </small></address>

@@ -19,8 +19,15 @@ typedef struct T *T;
 
 /*! \brief Creates a matrix in a triplet form according to COO scheme.
  *
+ * \param orig_size The dimension of the original square matrix
  * \param nz Number of non-zero elements
- * \return Pointer to the triplet form
+ * \return Pointer to the coo_matrix created
+ *
+ * Usage:
+ * \code{.c}
+ *     coo_matrix_T cm;
+ *     cm = coo_matrix_new(50, 3);
+ * \endcode
  */
 extern T coo_matrix_new(size_t orig_size, size_t nz);
 
@@ -29,6 +36,13 @@ extern T coo_matrix_new(size_t orig_size, size_t nz);
  *
  * \param A Sparse matrix in triplet COO scheme
  * \param val Pointer to the value array
+ *
+ * Usage:
+ * \code{.c}
+ *     // For an allocated matrix cm with 10 non-zero values:
+ *     double values[10] = { 1., 34., 21., 65.43, 0., 74.2, 0.3, 8., 19.2 };
+ *     coo_matrix_init_values(cm, values);
+ * \endcode
  */
 extern void coo_matrix_init_values(T A, double *val);
 
@@ -60,7 +74,7 @@ extern void coo_matrix_delete(T A);
  *
  * \param A Input matrix
  * \param x Input vactor
- * \param y Result of A*x
+ * \param y Result of \f$ A*x \f$
  */
 extern void coo_matrix_vector_mul(const T A,
                                   const double *x,

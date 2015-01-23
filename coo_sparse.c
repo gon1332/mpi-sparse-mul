@@ -18,6 +18,18 @@ struct T {
 };
 
 
+/*!
+ * \details
+ * Creates a new matrix by allocating memory and
+ * initializing values of the structure fields.
+ *
+ * COO format was chosen for the needs of a project
+ * for the lesson *Parallel and Distributed Computation*.
+ *
+ * \todo Embed the custom malloc checking mechanism
+ * `Safecall`.
+ *
+ */
 T coo_matrix_new(size_t orig_size, size_t nz)
 {
     T ret = malloc(sizeof(struct T));
