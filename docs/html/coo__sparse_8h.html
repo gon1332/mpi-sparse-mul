@@ -4,7 +4,7 @@
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.9.1"/>
-<title>My Project: coo_sparse.h File Reference</title>
+<title>Sparse Matrices: coo_sparse.h File Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -23,7 +23,7 @@
  <tbody>
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
-   <div id="projectname">My Project
+   <div id="projectname">Sparse Matrices
    </div>
    <div id="projectbrief">Sparse matrix-vector multiplication in COO format with MPI.</div>
   </td>
@@ -91,7 +91,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 </div><!--header-->
 <div class="contents">
 
-<p>Function prototypes for COO.  
+<p>Interface of COO matrix data type.  
 <a href="#details">More...</a></p>
 <div class="textblock"><code>#include &lt;stdlib.h&gt;</code><br />
 </div>
@@ -146,7 +146,7 @@ Functions</h2></td></tr>
 <tr class="separator:af2d7a10cf92a3637c169a93fb66277fa"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>Function prototypes for COO. </p>
+<div class="textblock"><p>Interface of COO matrix data type. </p>
 </div><h2 class="groupheader">Function Documentation</h2>
 <a class="anchor" id="a53cc720d0b69da4025f5031c5f41ecc4"></a>
 <div class="memitem">
@@ -165,10 +165,12 @@ Functions</h2></td></tr>
 <p>Delete the given sparse matrix which uses the COO scheme. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">A</td><td>Sparse matrix in triplet COO scheme </td></tr>
+    <tr><td class="paramname">A</td><td>Sparse matrix in triplet COO scheme</td></tr>
   </table>
   </dd>
 </dl>
+<p>Frees the memory allocated by <code>coo_matrix_new</code> for the <code>A</code> coo matrix. Also sets the corresponding pointers to <code>NULL</code>.</p>
+<dl class="section pre"><dt>Precondition</dt><dd>First create a coo matrix with <code>coo_matrix_new</code>. </dd></dl>
 
 </div>
 </div>
@@ -200,10 +202,17 @@ Functions</h2></td></tr>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">A</td><td>Sparse matrix in triplet COO scheme </td></tr>
-    <tr><td class="paramname">val</td><td>Pointer to the column index array </td></tr>
+    <tr><td class="paramname">val</td><td>Pointer to the column index array</td></tr>
   </table>
   </dd>
 </dl>
+<p>Usage: </p><div class="fragment"><div class="line"><span class="comment">// For an allocated matrix cm with 10 non-zero values:</span></div>
+<div class="line"></div>
+<div class="line"><span class="keywordtype">double</span> row_indices[10] = { 0, 0, 1, 15, 28, 34, 35, 48, 49 };</div>
+<div class="line"></div>
+<div class="line"><a class="code" href="coo__sparse_8h.html#ab259b22d7bd58c8fccd372079406bd05">coo_matrix_init_values</a>(cm, row_indices);</div>
+</div><!-- fragment --><p>Initializes the columns array of the coo matrix by copying the array <code>val</code> to the allocated memory from <code>coo_matrix_new</code>.</p>
+<dl class="section pre"><dt>Precondition</dt><dd>First create a coo matrix with <code>coo_matrix_new</code>. </dd></dl>
 
 </div>
 </div>
@@ -235,10 +244,17 @@ Functions</h2></td></tr>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">A</td><td>Sparse matrix in triplet COO scheme </td></tr>
-    <tr><td class="paramname">val</td><td>Pointer to the row index array </td></tr>
+    <tr><td class="paramname">val</td><td>Pointer to the row index array</td></tr>
   </table>
   </dd>
 </dl>
+<p>Usage: </p><div class="fragment"><div class="line"><span class="comment">// For an allocated matrix cm with 10 non-zero values:</span></div>
+<div class="line"></div>
+<div class="line"><span class="keywordtype">double</span> col_indices[10] = { 1, 14, 21, 15, 20, 34, 0, 8, 19 };</div>
+<div class="line"></div>
+<div class="line"><a class="code" href="coo__sparse_8h.html#ab259b22d7bd58c8fccd372079406bd05">coo_matrix_init_values</a>(cm, col_indices);</div>
+</div><!-- fragment --><p>Initializes the rows array of the coo matrix by copying the array <code>val</code> to the allocated memory from <code>coo_matrix_new</code>.</p>
+<dl class="section pre"><dt>Precondition</dt><dd>First create a coo matrix with <code>coo_matrix_new</code>. </dd></dl>
 
 </div>
 </div>
@@ -275,9 +291,13 @@ Functions</h2></td></tr>
   </dd>
 </dl>
 <p>Usage: </p><div class="fragment"><div class="line"><span class="comment">// For an allocated matrix cm with 10 non-zero values:</span></div>
+<div class="line"></div>
 <div class="line"><span class="keywordtype">double</span> values[10] = { 1., 34., 21., 65.43, 0., 74.2, 0.3, 8., 19.2 };</div>
+<div class="line"></div>
 <div class="line"><a class="code" href="coo__sparse_8h.html#ab259b22d7bd58c8fccd372079406bd05">coo_matrix_init_values</a>(cm, values);</div>
-</div><!-- fragment --> 
+</div><!-- fragment --><p>Initializes the values array of the coo matrix by copying the array <code>val</code> to the allocated memory from <code>coo_matrix_new</code>.</p>
+<dl class="section pre"><dt>Precondition</dt><dd>First create a coo matrix with <code>coo_matrix_new</code>. </dd></dl>
+
 </div>
 </div>
 <a class="anchor" id="ad0682ee49d67c0e273ddd69d551d9eba"></a>
@@ -354,19 +374,29 @@ Functions</h2></td></tr>
 <p>Multiplies matrix A by vector x and stores the result in vector y. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">A</td><td>Input matrix </td></tr>
-    <tr><td class="paramname">x</td><td>Input vactor </td></tr>
-    <tr><td class="paramname">y</td><td>Result of <img class="formulaInl" alt="$ A*x $" src="form_0.png"/> </td></tr>
+    <tr><td class="paramname">A[in]</td><td>Input matrix </td></tr>
+    <tr><td class="paramname">x[in]</td><td>Input vactor </td></tr>
+    <tr><td class="paramname">y[out]</td><td>Result of <img class="formulaInl" alt="$ A*x $" src="form_0.png"/></td></tr>
   </table>
   </dd>
 </dl>
+<p>Performs a matrix-vector multiplication that fits the COO format of sparse matrices. If the coo matrix has <code>nnz</code> elements and the names below for the arrays that represent it:</p>
+<ul>
+<li><code>values</code> - <em>array of non-zero values from original matrix</em></li>
+<li><code>row_ind</code> - <em>array of row indices corresponding to the rows of the original matrix</em></li>
+<li><code>col_ind</code> - <em>array of row indices corresponding to the columns of the original matrix</em></li>
+</ul>
+<p>the algorithm used is:</p>
+<div class="fragment"><div class="line"><a name="l00001"></a><span class="lineno">    1</span>&#160;for i in 1..nnz:</div>
+<div class="line"><a name="l00002"></a><span class="lineno">    2</span>&#160;    y[row_ind[i]] = y[row_ind[i]] + values[i] * x[col_ind[i]]</div>
+</div><!-- fragment --><dl class="section pre"><dt>Precondition</dt><dd>First create and initialize a coo matrix with <code>coo_matrix_new</code>. </dd></dl>
 
 </div>
 </div>
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Fri Jan 23 2015 01:08:25 for My Project by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Fri Jan 23 2015 15:21:21 for Sparse Matrices by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.9.1
 </small></address>

@@ -4,7 +4,7 @@
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.9.1"/>
-<title>My Project: coo_sparse.h Source File</title>
+<title>Sparse Matrices: coo_sparse.h Source File</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -23,7 +23,7 @@
  <tbody>
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
-   <div id="projectname">My Project
+   <div id="projectname">Sparse Matrices
    </div>
    <div id="projectbrief">Sparse matrix-vector multiplication in COO format with MPI.</div>
   </td>
@@ -100,39 +100,42 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00017"></a><span class="lineno">   17</span>&#160;<span class="preprocessor">#define coo_matrix_get_row_index(A, i)      (A-&gt;row_ind[i])</span></div>
 <div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160;</div>
 <div class="line"><a name="l00019"></a><span class="lineno">   19</span>&#160;</div>
-<div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160;<span class="keyword">extern</span> T <a class="code" href="coo__sparse_8h.html#ad0682ee49d67c0e273ddd69d551d9eba">coo_matrix_new</a>(<span class="keywordtype">size_t</span> orig_size, <span class="keywordtype">size_t</span> nz);</div>
+<div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160;<span class="keyword">extern</span> T <a class="code" href="coo__sparse_8h.html#ad0682ee49d67c0e273ddd69d551d9eba">coo_matrix_new</a>(<span class="keywordtype">size_t</span> <a class="code" href="structT.html#a096f593057619f55db6a4455da71b7cb">orig_size</a>, <span class="keywordtype">size_t</span> <a class="code" href="structT.html#a0ed59e848731d9326fcd97031324b262">nz</a>);</div>
 <div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;</div>
 <div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;</div>
-<div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;<span class="keyword">extern</span> <span class="keywordtype">void</span> <a class="code" href="coo__sparse_8h.html#ab259b22d7bd58c8fccd372079406bd05">coo_matrix_init_values</a>(T A, <span class="keywordtype">double</span> *val);</div>
-<div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;</div>
-<div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;</div>
-<div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;<span class="keyword">extern</span> <span class="keywordtype">void</span> <a class="code" href="coo__sparse_8h.html#a2d49b0ec3908d9a187e16dc97556c6bd">coo_matrix_init_columns</a>(T A, <span class="keywordtype">size_t</span> *col);</div>
-<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;</div>
-<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;</div>
-<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;<span class="keyword">extern</span> <span class="keywordtype">void</span> <a class="code" href="coo__sparse_8h.html#a214573111b019d0e680b3fb9d3a65746">coo_matrix_init_rows</a>(T A, <span class="keywordtype">size_t</span> *row);</div>
-<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;</div>
-<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;</div>
-<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;<span class="keyword">extern</span> <span class="keywordtype">void</span> <a class="code" href="coo__sparse_8h.html#a53cc720d0b69da4025f5031c5f41ecc4">coo_matrix_delete</a>(T A);</div>
-<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;</div>
-<div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;</div>
-<div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;<span class="keyword">extern</span> <span class="keywordtype">void</span> <a class="code" href="coo__sparse_8h.html#af2d7a10cf92a3637c169a93fb66277fa">coo_matrix_vector_mul</a>(<span class="keyword">const</span> T A,</div>
-<div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160;                                  <span class="keyword">const</span> <span class="keywordtype">double</span> *x,</div>
-<div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160;                                  <span class="keywordtype">double</span> *y);</div>
-<div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160;</div>
-<div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160;<span class="preprocessor">#undef T</span></div>
-<div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160;<span class="preprocessor">#endif </span><span class="comment">/* COO_SPARSE_H_7EUNGWRE */</span><span class="preprocessor"></span></div>
+<div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;<span class="keyword">extern</span> <span class="keywordtype">void</span> <a class="code" href="coo__sparse_8h.html#ab259b22d7bd58c8fccd372079406bd05">coo_matrix_init_values</a>(T A, <span class="keywordtype">double</span> *<a class="code" href="structT.html#a800526718f6565046e1f7404ea7f24d2">val</a>);</div>
+<div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;</div>
+<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;</div>
+<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;<span class="keyword">extern</span> <span class="keywordtype">void</span> <a class="code" href="coo__sparse_8h.html#a2d49b0ec3908d9a187e16dc97556c6bd">coo_matrix_init_columns</a>(T A, <span class="keywordtype">size_t</span> *col);</div>
+<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;</div>
+<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;</div>
+<div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160;<span class="keyword">extern</span> <span class="keywordtype">void</span> <a class="code" href="coo__sparse_8h.html#a214573111b019d0e680b3fb9d3a65746">coo_matrix_init_rows</a>(T A, <span class="keywordtype">size_t</span> *row);</div>
+<div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160;</div>
 <div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160;</div>
-<div class="ttc" id="structT_html"><div class="ttname"><a href="structT.html">T</a></div><div class="ttdoc">Matrix in triplet form using COO scheme. </div><div class="ttdef"><b>Definition:</b> coo_sparse.c:11</div></div>
-<div class="ttc" id="coo__sparse_8h_html_af2d7a10cf92a3637c169a93fb66277fa"><div class="ttname"><a href="coo__sparse_8h.html#af2d7a10cf92a3637c169a93fb66277fa">coo_matrix_vector_mul</a></div><div class="ttdeci">void coo_matrix_vector_mul(const T A, const double *x, double *y)</div><div class="ttdoc">Multiplies matrix A by vector x and stores the result in vector y. </div><div class="ttdef"><b>Definition:</b> coo_sparse.c:92</div></div>
-<div class="ttc" id="coo__sparse_8h_html_a2d49b0ec3908d9a187e16dc97556c6bd"><div class="ttname"><a href="coo__sparse_8h.html#a2d49b0ec3908d9a187e16dc97556c6bd">coo_matrix_init_columns</a></div><div class="ttdeci">void coo_matrix_init_columns(T A, size_t *col)</div><div class="ttdoc">Initialize the column index array of the triplet. </div><div class="ttdef"><b>Definition:</b> coo_sparse.c:63</div></div>
-<div class="ttc" id="coo__sparse_8h_html_ab259b22d7bd58c8fccd372079406bd05"><div class="ttname"><a href="coo__sparse_8h.html#ab259b22d7bd58c8fccd372079406bd05">coo_matrix_init_values</a></div><div class="ttdeci">void coo_matrix_init_values(T A, double *val)</div><div class="ttdoc">Initializes the value array of the triplet. </div><div class="ttdef"><b>Definition:</b> coo_sparse.c:54</div></div>
-<div class="ttc" id="coo__sparse_8h_html_ad0682ee49d67c0e273ddd69d551d9eba"><div class="ttname"><a href="coo__sparse_8h.html#ad0682ee49d67c0e273ddd69d551d9eba">coo_matrix_new</a></div><div class="ttdeci">T coo_matrix_new(size_t orig_size, size_t nz)</div><div class="ttdoc">Creates a matrix in a triplet form according to COO scheme. </div><div class="ttdef"><b>Definition:</b> coo_sparse.c:33</div></div>
-<div class="ttc" id="coo__sparse_8h_html_a53cc720d0b69da4025f5031c5f41ecc4"><div class="ttname"><a href="coo__sparse_8h.html#a53cc720d0b69da4025f5031c5f41ecc4">coo_matrix_delete</a></div><div class="ttdeci">void coo_matrix_delete(T A)</div><div class="ttdoc">Delete the given sparse matrix which uses the COO scheme. </div><div class="ttdef"><b>Definition:</b> coo_sparse.c:81</div></div>
-<div class="ttc" id="coo__sparse_8h_html_a214573111b019d0e680b3fb9d3a65746"><div class="ttname"><a href="coo__sparse_8h.html#a214573111b019d0e680b3fb9d3a65746">coo_matrix_init_rows</a></div><div class="ttdeci">void coo_matrix_init_rows(T A, size_t *row)</div><div class="ttdoc">Initialize the row index array of the triplet. </div><div class="ttdef"><b>Definition:</b> coo_sparse.c:72</div></div>
+<div class="line"><a name="l00090"></a><span class="lineno">   90</span>&#160;<span class="keyword">extern</span> <span class="keywordtype">void</span> <a class="code" href="coo__sparse_8h.html#a53cc720d0b69da4025f5031c5f41ecc4">coo_matrix_delete</a>(T A);</div>
+<div class="line"><a name="l00091"></a><span class="lineno">   91</span>&#160;</div>
+<div class="line"><a name="l00092"></a><span class="lineno">   92</span>&#160;</div>
+<div class="line"><a name="l00099"></a><span class="lineno">   99</span>&#160;<span class="keyword">extern</span> <span class="keywordtype">void</span> <a class="code" href="coo__sparse_8h.html#af2d7a10cf92a3637c169a93fb66277fa">coo_matrix_vector_mul</a>(<span class="keyword">const</span> T A,</div>
+<div class="line"><a name="l00100"></a><span class="lineno">  100</span>&#160;                                  <span class="keyword">const</span> <span class="keywordtype">double</span> *x,</div>
+<div class="line"><a name="l00101"></a><span class="lineno">  101</span>&#160;                                  <span class="keywordtype">double</span> *y);</div>
+<div class="line"><a name="l00102"></a><span class="lineno">  102</span>&#160;</div>
+<div class="line"><a name="l00103"></a><span class="lineno">  103</span>&#160;<span class="preprocessor">#undef T</span></div>
+<div class="line"><a name="l00104"></a><span class="lineno">  104</span>&#160;<span class="preprocessor">#endif </span><span class="comment">/* COO_SPARSE_H_7EUNGWRE */</span><span class="preprocessor"></span></div>
+<div class="line"><a name="l00105"></a><span class="lineno">  105</span>&#160;</div>
+<div class="ttc" id="structT_html"><div class="ttname"><a href="structT.html">T</a></div><div class="ttdef"><b>Definition:</b> coo_sparse.c:12</div></div>
+<div class="ttc" id="coo__sparse_8h_html_af2d7a10cf92a3637c169a93fb66277fa"><div class="ttname"><a href="coo__sparse_8h.html#af2d7a10cf92a3637c169a93fb66277fa">coo_matrix_vector_mul</a></div><div class="ttdeci">void coo_matrix_vector_mul(const T A, const double *x, double *y)</div><div class="ttdoc">Multiplies matrix A by vector x and stores the result in vector y. </div><div class="ttdef"><b>Definition:</b> coo_sparse.c:148</div></div>
+<div class="ttc" id="coo__sparse_8h_html_a2d49b0ec3908d9a187e16dc97556c6bd"><div class="ttname"><a href="coo__sparse_8h.html#a2d49b0ec3908d9a187e16dc97556c6bd">coo_matrix_init_columns</a></div><div class="ttdeci">void coo_matrix_init_columns(T A, size_t *col)</div><div class="ttdoc">Initialize the column index array of the triplet. </div><div class="ttdef"><b>Definition:</b> coo_sparse.c:81</div></div>
+<div class="ttc" id="structT_html_a096f593057619f55db6a4455da71b7cb"><div class="ttname"><a href="structT.html#a096f593057619f55db6a4455da71b7cb">T::orig_size</a></div><div class="ttdeci">size_t orig_size</div><div class="ttdef"><b>Definition:</b> coo_sparse.c:21</div></div>
+<div class="ttc" id="coo__sparse_8h_html_ab259b22d7bd58c8fccd372079406bd05"><div class="ttname"><a href="coo__sparse_8h.html#ab259b22d7bd58c8fccd372079406bd05">coo_matrix_init_values</a></div><div class="ttdeci">void coo_matrix_init_values(T A, double *val)</div><div class="ttdoc">Initializes the value array of the triplet. </div><div class="ttdef"><b>Definition:</b> coo_sparse.c:65</div></div>
+<div class="ttc" id="coo__sparse_8h_html_ad0682ee49d67c0e273ddd69d551d9eba"><div class="ttname"><a href="coo__sparse_8h.html#ad0682ee49d67c0e273ddd69d551d9eba">coo_matrix_new</a></div><div class="ttdeci">T coo_matrix_new(size_t orig_size, size_t nz)</div><div class="ttdoc">Creates a matrix in a triplet form according to COO scheme. </div><div class="ttdef"><b>Definition:</b> coo_sparse.c:37</div></div>
+<div class="ttc" id="coo__sparse_8h_html_a53cc720d0b69da4025f5031c5f41ecc4"><div class="ttname"><a href="coo__sparse_8h.html#a53cc720d0b69da4025f5031c5f41ecc4">coo_matrix_delete</a></div><div class="ttdeci">void coo_matrix_delete(T A)</div><div class="ttdoc">Delete the given sparse matrix which uses the COO scheme. </div><div class="ttdef"><b>Definition:</b> coo_sparse.c:113</div></div>
+<div class="ttc" id="coo__sparse_8h_html_a214573111b019d0e680b3fb9d3a65746"><div class="ttname"><a href="coo__sparse_8h.html#a214573111b019d0e680b3fb9d3a65746">coo_matrix_init_rows</a></div><div class="ttdeci">void coo_matrix_init_rows(T A, size_t *row)</div><div class="ttdoc">Initialize the row index array of the triplet. </div><div class="ttdef"><b>Definition:</b> coo_sparse.c:97</div></div>
+<div class="ttc" id="structT_html_a0ed59e848731d9326fcd97031324b262"><div class="ttname"><a href="structT.html#a0ed59e848731d9326fcd97031324b262">T::nz</a></div><div class="ttdeci">size_t nz</div><div class="ttdef"><b>Definition:</b> coo_sparse.c:20</div></div>
+<div class="ttc" id="structT_html_a800526718f6565046e1f7404ea7f24d2"><div class="ttname"><a href="structT.html#a800526718f6565046e1f7404ea7f24d2">T::val</a></div><div class="ttdeci">double * val</div><div class="ttdef"><b>Definition:</b> coo_sparse.c:13</div></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Fri Jan 23 2015 01:08:25 for My Project by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Fri Jan 23 2015 15:21:21 for Sparse Matrices by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.9.1
 </small></address>

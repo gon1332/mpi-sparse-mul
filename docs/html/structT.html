@@ -4,7 +4,7 @@
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.9.1"/>
-<title>My Project: T Struct Reference</title>
+<title>Sparse Matrices: T Struct Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -23,7 +23,7 @@
  <tbody>
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
-   <div id="projectname">My Project
+   <div id="projectname">Sparse Matrices
    </div>
    <div id="projectbrief">Sparse matrix-vector multiplication in COO format with MPI.</div>
   </td>
@@ -64,6 +64,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
     <ul class="tablist">
       <li><a href="annotated.html"><span>Data&#160;Structures</span></a></li>
       <li><a href="classes.html"><span>Data&#160;Structure&#160;Index</span></a></li>
+      <li><a href="functions.html"><span>Data&#160;Fields</span></a></li>
     </ul>
   </div>
 <!-- window showing the filter options -->
@@ -88,37 +89,96 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="title">T Struct Reference</div>  </div>
 </div><!--header-->
 <div class="contents">
-
-<p>Matrix in triplet form using COO scheme.  
- <a href="structT.html#details">More...</a></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-attribs"></a>
 Data Fields</h2></td></tr>
-<tr class="memitem:a800526718f6565046e1f7404ea7f24d2"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a800526718f6565046e1f7404ea7f24d2"></a>
-double *&#160;</td><td class="memItemRight" valign="bottom"><b>val</b></td></tr>
+<tr class="memitem:a800526718f6565046e1f7404ea7f24d2"><td class="memItemLeft" align="right" valign="top">double *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structT.html#a800526718f6565046e1f7404ea7f24d2">val</a></td></tr>
 <tr class="separator:a800526718f6565046e1f7404ea7f24d2"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a22b61edc32d9c6a1e0658e13700abae9"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a22b61edc32d9c6a1e0658e13700abae9"></a>
-size_t *&#160;</td><td class="memItemRight" valign="bottom"><b>col_ind</b></td></tr>
+<tr class="memitem:a22b61edc32d9c6a1e0658e13700abae9"><td class="memItemLeft" align="right" valign="top">size_t *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structT.html#a22b61edc32d9c6a1e0658e13700abae9">col_ind</a></td></tr>
 <tr class="separator:a22b61edc32d9c6a1e0658e13700abae9"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac8516494708233beac9c5f78037f608f"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ac8516494708233beac9c5f78037f608f"></a>
-size_t *&#160;</td><td class="memItemRight" valign="bottom"><b>row_ind</b></td></tr>
+<tr class="memitem:ac8516494708233beac9c5f78037f608f"><td class="memItemLeft" align="right" valign="top">size_t *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structT.html#ac8516494708233beac9c5f78037f608f">row_ind</a></td></tr>
 <tr class="separator:ac8516494708233beac9c5f78037f608f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0ed59e848731d9326fcd97031324b262"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a0ed59e848731d9326fcd97031324b262"></a>
-size_t&#160;</td><td class="memItemRight" valign="bottom"><b>nz</b></td></tr>
+<tr><td colspan="2"><div class="groupHeader">Supporting fields</div></td></tr>
+<tr class="memitem:a0ed59e848731d9326fcd97031324b262"><td class="memItemLeft" align="right" valign="top">size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structT.html#a0ed59e848731d9326fcd97031324b262">nz</a></td></tr>
 <tr class="separator:a0ed59e848731d9326fcd97031324b262"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a096f593057619f55db6a4455da71b7cb"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a096f593057619f55db6a4455da71b7cb"></a>
-size_t&#160;</td><td class="memItemRight" valign="bottom"><b>orig_size</b></td></tr>
+<tr class="memitem:a096f593057619f55db6a4455da71b7cb"><td class="memItemLeft" align="right" valign="top">size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structT.html#a096f593057619f55db6a4455da71b7cb">orig_size</a></td></tr>
 <tr class="separator:a096f593057619f55db6a4455da71b7cb"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>Matrix in triplet form using COO scheme. </p>
-</div><hr/>The documentation for this struct was generated from the following file:<ul>
+<div class="textblock"><p>A structure to represent sparse matrices in COO format. </p>
+</div><h2 class="groupheader">Field Documentation</h2>
+<a class="anchor" id="a22b61edc32d9c6a1e0658e13700abae9"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">size_t* T::col_ind</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>array of row indices </p>
+
+</div>
+</div>
+<a class="anchor" id="a0ed59e848731d9326fcd97031324b262"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">size_t T::nz</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>number of non-zero elements </p>
+
+</div>
+</div>
+<a class="anchor" id="a096f593057619f55db6a4455da71b7cb"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">size_t T::orig_size</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>dimension of the original sparse matrix </p>
+
+</div>
+</div>
+<a class="anchor" id="ac8516494708233beac9c5f78037f608f"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">size_t* T::row_ind</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>array of column indices </p>
+
+</div>
+</div>
+<a class="anchor" id="a800526718f6565046e1f7404ea7f24d2"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">double* T::val</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>array of non-zero values </p>
+
+</div>
+</div>
+<hr/>The documentation for this struct was generated from the following file:<ul>
 <li>coo_sparse.c</li>
 </ul>
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Fri Jan 23 2015 01:08:25 for My Project by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Fri Jan 23 2015 15:21:21 for Sparse Matrices by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.9.1
 </small></address>

@@ -1,10 +1,11 @@
 var indexSectionsWithContent =
 {
-  0: "cmrt",
+  0: "cmnortv",
   1: "t",
   2: "c",
   3: "c",
-  4: "mrt"
+  4: "cnorv",
+  5: "mrt"
 };
 
 var indexSectionNames =
@@ -13,7 +14,8 @@ var indexSectionNames =
   1: "classes",
   2: "files",
   3: "functions",
-  4: "pages"
+  4: "variables",
+  5: "pages"
 };
 
 var indexSectionLabels =
@@ -22,6 +24,7 @@ var indexSectionLabels =
   1: "Data Structures",
   2: "Files",
   3: "Functions",
-  4: "Pages"
+  4: "Variables",
+  5: "Pages"
 };
 

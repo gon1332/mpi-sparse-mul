@@ -1,5 +1,6 @@
 var searchData=
 [
+  ['col_5find',['col_ind',['../structT.html#a22b61edc32d9c6a1e0658e13700abae9',1,'T']]],
   ['coo_5fmatrix_5fdelete',['coo_matrix_delete',['../coo__sparse_8h.html#a53cc720d0b69da4025f5031c5f41ecc4',1,'coo_sparse.c']]],
   ['coo_5fmatrix_5finit_5fcolumns',['coo_matrix_init_columns',['../coo__sparse_8h.html#a2d49b0ec3908d9a187e16dc97556c6bd',1,'coo_sparse.c']]],
   ['coo_5fmatrix_5finit_5frows',['coo_matrix_init_rows',['../coo__sparse_8h.html#a214573111b019d0e680b3fb9d3a65746',1,'coo_sparse.c']]],

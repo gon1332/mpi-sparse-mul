@@ -5,16 +5,20 @@
 
 #define T coo_matrix_T
 
-/*! \brief Matrix in triplet form using COO scheme.
+/*!
+ * A structure to represent sparse matrices in COO format.
  *
  */
 struct T {
-    double *val;
-    size_t *col_ind;
-    size_t *row_ind;
+    double *val;    /*!< array of non-zero values */
+    size_t *col_ind;/*!< array of row indices */
+    size_t *row_ind;/*!< array of column indices */
 
-    size_t nz;
-    size_t orig_size;
+    /*!
+     * \name Supporting fields
+     */
+    size_t nz;          /*!< number of non-zero elements*/
+    size_t orig_size;   /*!< dimension of the original sparse matrix*/
 };
 
 
@@ -51,6 +55,13 @@ T coo_matrix_new(size_t orig_size, size_t nz)
 }
 
 
+/*!
+ * \details
+ * Initializes the values array of the coo matrix by copying the
+ * array `val` to the allocated memory from `coo_matrix_new`.
+ *
+ * \pre First create a coo matrix with `coo_matrix_new`.
+ */
 void coo_matrix_init_values(T A, double *val)
 {
     assert(A);
@@ -60,6 +71,13 @@ void coo_matrix_init_values(T A, double *val)
 }
 
 
+/*!
+ * \details
+ * Initializes the columns array of the coo matrix by copying the
+ * array `val` to the allocated memory from `coo_matrix_new`.
+ *
+ * \pre First create a coo matrix with `coo_matrix_new`.
+ */
 void coo_matrix_init_columns(T A, size_t *col)
 {
     assert(A);
@@ -69,6 +87,13 @@ void coo_matrix_init_columns(T A, size_t *col)
 }
 
 
+/*!
+ * \details
+ * Initializes the rows array of the coo matrix by copying the
+ * array `val` to the allocated memory from `coo_matrix_new`.
+ *
+ * \pre First create a coo matrix with `coo_matrix_new`.
+ */
 void coo_matrix_init_rows(T A, size_t *row)
 {
     assert(A);
@@ -78,6 +103,13 @@ void coo_matrix_init_rows(T A, size_t *row)
 }
 
 
+/*!
+ * \details
+ * Frees the memory allocated by `coo_matrix_new` for the `A` coo
+ * matrix. Also sets the corresponding pointers to `NULL`.
+ *
+ * \pre First create a coo matrix with `coo_matrix_new`.
+ */
 void coo_matrix_delete(T A)
 {
     assert(A);
@@ -89,6 +121,30 @@ void coo_matrix_delete(T A)
 }
 
 
+/*!
+ * \details
+ * Performs a matrix-vector multiplication that fits the
+ * COO format of sparse matrices. If the coo matrix has
+ * `nnz` elements and the names below for the arrays that
+ * represent it:
+ *
+ * * `values` - *array of non-zero values from original matrix*
+ * * `row_ind` - *array of row indices corresponding to the rows
+ * of the original matrix*
+ * * `col_ind` - *array of row indices corresponding to the columns
+ * of the original matrix*
+ *
+ *
+ * the algorithm used is:
+ *
+ * ~~~~~~~~~~~~~~~~~
+ *     for i in 1..nnz:
+ *         y[row_ind[i]] = y[row_ind[i]] + values[i] * x[col_ind[i]]
+ * ~~~~~~~~~~~~~~~~~
+ *
+ *
+ * \pre First create and initialize a coo matrix with `coo_matrix_new`.
+ */
 void coo_matrix_vector_mul(const T A,
                            const double *x,
                            double *y)

@@ -4,7 +4,7 @@
 
 /*!
  * \file coo_sparse.h
- * \brief Function prototypes for COO.
+ * \brief Interface of COO matrix data type.
  */
 
 #define T coo_matrix_T
@@ -24,57 +24,77 @@ typedef struct T *T;
  * \return Pointer to the coo_matrix created
  *
  * Usage:
- * \code{.c}
+ * ~~~~~~~~~~~~~~~~{.c}
  *     coo_matrix_T cm;
  *     cm = coo_matrix_new(50, 3);
- * \endcode
+ * ~~~~~~~~~~~~~~~~
  */
 extern T coo_matrix_new(size_t orig_size, size_t nz);
 
 
 /*! \brief Initializes the value array of the triplet.
  *
- * \param A Sparse matrix in triplet COO scheme
- * \param val Pointer to the value array
+ * \param A     Sparse matrix in triplet COO scheme
+ * \param val   Pointer to the value array
  *
  * Usage:
- * \code{.c}
+ * ~~~~~~~~~~~~~~~~{.c}
  *     // For an allocated matrix cm with 10 non-zero values:
+ *
  *     double values[10] = { 1., 34., 21., 65.43, 0., 74.2, 0.3, 8., 19.2 };
+ *
  *     coo_matrix_init_values(cm, values);
- * \endcode
+ * ~~~~~~~~~~~~~~~~
  */
 extern void coo_matrix_init_values(T A, double *val);
 
 
 /*! \brief Initialize the column index array of the triplet.
  *
- * \param A Sparse matrix in triplet COO scheme
- * \param val Pointer to the column index array
+ * \param A     Sparse matrix in triplet COO scheme
+ * \param val   Pointer to the column index array
+ *
+ * Usage:
+ * ~~~~~~~~~~~~~~~~{.c}
+ *     // For an allocated matrix cm with 10 non-zero values:
+ *
+ *     double row_indices[10] = { 0, 0, 1, 15, 28, 34, 35, 48, 49 };
+ *
+ *     coo_matrix_init_values(cm, row_indices);
+ * ~~~~~~~~~~~~~~~~
  */
 extern void coo_matrix_init_columns(T A, size_t *col);
 
 
 /*! \brief Initialize the row index array of the triplet.
  *
- * \param A Sparse matrix in triplet COO scheme
- * \param val Pointer to the row index array
+ * \param A     Sparse matrix in triplet COO scheme
+ * \param val   Pointer to the row index array
+ *
+ * Usage:
+ * ~~~~~~~~~~~~~~~~{.c}
+ *     // For an allocated matrix cm with 10 non-zero values:
+ *
+ *     double col_indices[10] = { 1, 14, 21, 15, 20, 34, 0, 8, 19 };
+ *
+ *     coo_matrix_init_values(cm, col_indices);
+ * ~~~~~~~~~~~~~~~~
  */
 extern void coo_matrix_init_rows(T A, size_t *row);
 
 
 /*! \brief Delete the given sparse matrix which uses the COO scheme.
  *
- * \param A Sparse matrix in triplet COO scheme
+ * \param A     Sparse matrix in triplet COO scheme
  */
 extern void coo_matrix_delete(T A);
 
 
 /*! \brief Multiplies matrix A by vector x and stores the result in vector y.
  *
- * \param A Input matrix
- * \param x Input vactor
- * \param y Result of \f$ A*x \f$
+ * \param A[in]     Input matrix
+ * \param x[in]     Input vactor
+ * \param y[out]    Result of \f$ A*x \f$
  */
 extern void coo_matrix_vector_mul(const T A,
                                   const double *x,
