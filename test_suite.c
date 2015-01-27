@@ -72,7 +72,7 @@ void print_array(double *array, size_t size);
 #define  MASTER		0
 void parallel_tests(int numtasks, int argc, char *argv[])
 {
-    int taskid, rc, dest, offset, i, tag1, tag2, source, chunksize;
+    int taskid, rc, dest, offset, i, tag1, tag2, tag3, tag4, tag5 , source, chunksize;
 
     MPI_Status status;
 
@@ -82,9 +82,13 @@ void parallel_tests(int numtasks, int argc, char *argv[])
     MPI_Comm_rank(MPI_COMM_WORLD, &taskid);
     printf("MPI task %d has started...\n", taskid);
 
-	
-	tag2 = 1;
-    tag1 = 2;
+	/* Tags are used to keep consistent and healthy flow of data during comm */
+	tag2 = 1;		// val_array
+    tag1 = 2;		// chuncksize
+    tag3 = 3;		// row_ind
+    tag4 = 4;		// col_ind
+    tag5 = 5;		// x multiplicator array
+    
 	/************************* Master task only *******************************/
     
     if (taskid == MASTER) {
@@ -171,13 +175,19 @@ void parallel_tests(int numtasks, int argc, char *argv[])
             	
 	        	if (dest != MASTER){
 		            size_t chunksize = i - from;
-		            printf("MASTER has sent to process %zd ", dest);
-		            printf(" the array: ");
+		            printf("MASTER has sent to process %zd the array: ", dest);
 		            print_array(&val[from], chunksize);
 		            printf("\n");
 
+					/* number of elements to be sent */
 		            MPI_Send(&chunksize, 1, MPI_INT, dest, tag1, MPI_COMM_WORLD);
-		            //MPI_Send(&val[from], chunksize, MPI_DOUBLE, dest, tag2, MPI_COMM_WORLD);
+		            
+		            if (chunksize > 0) {
+		            	MPI_Send(&val[from], chunksize, MPI_DOUBLE, dest, tag2, MPI_COMM_WORLD);
+		            }
+		            
+		            /* distribute array x */
+		            
 				}
 				            
                 // ====== next iteration ====== 
@@ -187,33 +197,30 @@ void parallel_tests(int numtasks, int argc, char *argv[])
         		It is used for arrays that do not have at least one nz elem
         		in their rows, therefore they might spoil the execution.*/
                 if (product >= 1){
-                	i --; // steile to i na ksanakanei thn epanalipsi
-                
-		    		//printf("HELLOprv: dest: %zd,divisor: %d\n\n", dest, divisor);
-		    		//for (int j_ = 0; j_ < product; j_++ ){
-		    		//	dest++;
-		    		//	divisor += num_rows_pp;
-		    		//}
-		    		//printf("HELLO: dest: %zd,divisor: %d\n\n", dest, divisor);
+                	// if there is a logic jump in row_ind array re-do the last iteration 
+                	i --; 
         		}
                 dest++;
                 divisor += num_rows_pp;
             }
         }
-        /* send to last process */
+        /*** send to last process ***/
         chunksize = nnz - from;
-        printf("MASTER has sent to process %zd ", dest);
-        printf(" the array: ");
+        printf("MASTER has sent to process %zd the array: ", dest);
         print_array(&val[from], chunksize);
         MPI_Send(&chunksize, 1, MPI_INT, dest, tag1, MPI_COMM_WORLD);
+        
+        if (chunksize > 0) {
+        	MPI_Send(&val[from], chunksize, MPI_DOUBLE, dest, tag2, MPI_COMM_WORLD);
+        }
+        
         //MPI_Send(&val[from], chunksize, MPI_DOUBLE, dest, tag2, MPI_COMM_WORLD);
 		
-        
-
+       
         printf("Sent %zd elements to task %d offset= %zd\n", chunksize, dest, offset);
 
         /* Master does its part of the work */
-        offset = 0;
+        //offset = 0;
         //mysum = update(offset, chunksize, taskid);
 
         /* Wait to receive results from each task */
@@ -239,19 +246,16 @@ void parallel_tests(int numtasks, int argc, char *argv[])
         /* Receive my portion of array from the master task */
         
         source = MASTER;
-        MPI_Recv(&offset, 1, MPI_INT, source, tag1, MPI_COMM_WORLD, &status);
-        printf("I process %d have received from process %d the offset %d\n",taskid, source, offset);
+        MPI_Recv(&chunksize, 1, MPI_INT, source, tag1, MPI_COMM_WORLD, &status);
+        printf("I process %d have received from process %d the chunksize %d\n",
+        		taskid, source, chunksize);
         
-        //MPI_Recv(&my_ex, offset, MPI_DOUBLE, source, tag2,
-        //            MPI_COMM_WORLD, &status);
+        if  (chunksize > 0){
+        	MPI_Recv(&my_ex, chunksize, MPI_DOUBLE, source, tag2, MPI_COMM_WORLD, &status);
 
-        //printf("process %d offset is %d: [%d, %d].\n", taskid, offset, my_ex[0], my_ex[1]);
-        //my_ex[0] = offset;
-        //my_ex[1] = offset;
-
-		//printf("process %d has received :", taskid);
-		//print_array(&my_ex, offset);
-
+			printf(" I process %d have received :", taskid);
+			print_array(&my_ex, chunksize);
+		}
         /* Send my results back to the master task */
         //dest = MASTER;
         //MPI_Send(&offset, 1, MPI_INT, dest, tag1, MPI_COMM_WORLD);
