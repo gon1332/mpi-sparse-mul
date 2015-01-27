@@ -69,7 +69,6 @@ void test_suite(void)
 
 void print_array(double *array, size_t size);
 
-
 #define  MASTER		0
 void parallel_tests(int numtasks, int argc, char *argv[])
 {
@@ -83,11 +82,14 @@ void parallel_tests(int numtasks, int argc, char *argv[])
     MPI_Comm_rank(MPI_COMM_WORLD, &taskid);
     printf("MPI task %d has started...\n", taskid);
 
-
-    // ======================  TEST CASES  ====================================
-
-    /***** Master task only ******/
+	
+	tag2 = 1;
+    tag1 = 2;
+	/************************* Master task only *******************************/
+    
     if (taskid == MASTER) {
+    	// ======================  TEST CASES  ================================
+        // ===================== 1 =========================================
         size_t size = 8;
         size_t nnz = 14;
         coo_matrix_T test = coo_matrix_new(size, nnz);
@@ -103,40 +105,112 @@ void parallel_tests(int numtasks, int argc, char *argv[])
         double y_sol[8] = {60., 0., 15., 36., 6., 0., 15., 16.};
 
         double y_res[8] = {0.};
+		
+		// ======================== 2 =======================================
+		/*size_t size = 8;
+        size_t nnz = 10;
+        coo_matrix_T test = coo_matrix_new(size, nnz);
 
+        double val[14]     = {6., 9., 4., 4., 6., 5., 4., 3., 2., 2.};
+        size_t col_ind[14] = {0,  2,  5,  5,  4,  5,  5,  6,  6,  7};
+        size_t row_ind[14] = {0,  0,  0,  1,  4,  5,  6,  6,  7,  7};
+        coo_matrix_init_values(test, val);
+        coo_matrix_init_columns(test, col_ind);
+        coo_matrix_init_rows(test, row_ind);
 
-    // ======================  TEST CASES  ====================================
+        double x[8]     = { 1., 3.,  6.,  2., 1., 0.,  5.,  3.};
+        double y_sol[8] = {60., 0., 15., 36., 6., 0., 15., 16.};
+
+        double y_res[8] = {0.};
+		*/
+		// ======================== 3 =======================================
+		/*size_t size = 8;
+        size_t nnz = 6;
+        coo_matrix_T test = coo_matrix_new(size, nnz);
+
+        double val[14]     = { 6., 5., 4., 3., 2., 2.};
+        size_t col_ind[14] = {  4,  5,  5,  6,  6,  7};
+        size_t row_ind[14] = {  4,  5,  6,  6,  7,  7};
+        coo_matrix_init_values(test, val);
+        coo_matrix_init_columns(test, col_ind);
+        coo_matrix_init_rows(test, row_ind);
+
+        double x[8]     = { 1., 3.,  6.,  2., 1., 0.,  5.,  3.};
+        double y_sol[8] = {60., 0., 15., 36., 6., 0., 15., 16.};
+
+        double y_res[8] = {0.};
+		*/
+    	// ======================  TEST CASES  ================================
 
         if (size % numtasks != 0) {
             printf("Quitting. Number of MPI tasks must be divisible by 4.\n");
             MPI_Abort(MPI_COMM_WORLD, rc);
             exit(EXIT_FAILURE);
         }
-        int num_rows_pp = size / numtasks;
-        tag2 = 1;
-        tag1 = 2;
-
+        /* number of rows allocated to each process */
+        int num_rows_pp = size / numtasks;		
+        printf("num_rows_pp : %d\n", num_rows_pp);
+        
         /* Send each task its portion of the array - master keeps 1st part */
-        int dest = 0;
-        int from = 0;
+    	size_t dest = 0;
+        size_t from = 0;
+        int divisor = num_rows_pp;
+        int product = 0;
         for (size_t i = 0; i < nnz; i++) {
-            if ((row_ind[i]+1) % (num_rows_pp+1) == 0) {
-                if (dest != MASTER) {
-                    int chunksize = i - from;
-                    printf("MASTER has sent to process %d ", dest);
-                    printf("array: ");
-                    print_array(&val[from], chunksize);
+        
+        	product = row_ind[i] / divisor;
+        	
+        	/* 	if row_ind[i] mod divisor == 0 then the array recognized so far 
+        		should be passed to the designated destination process and 
+        		re-initialize the counters for the next array chunk  */
+            if ((row_ind[i]) % (divisor) == 0 || product > 1 ) {
+            	
+            	// the rows with value 0 --> we want to keep them in MASTER array
+            	if (row_ind[i] == 0)
+            		continue;				// ayto mporei kai na fygei
+            	
+	        	if (dest != MASTER){
+		            size_t chunksize = i - from;
+		            printf("MASTER has sent to process %zd ", dest);
+		            printf(" the array: ");
+		            print_array(&val[from], chunksize);
+		            printf("\n");
 
-                    MPI_Send(&chunksize, 1, MPI_INT, dest, tag1, MPI_COMM_WORLD);
-                    MPI_Send(&val[from], chunksize, MPI_DOUBLE, dest, tag2, MPI_COMM_WORLD);
-                }
-                dest++;
+		            MPI_Send(&chunksize, 1, MPI_INT, dest, tag1, MPI_COMM_WORLD);
+		            //MPI_Send(&val[from], chunksize, MPI_DOUBLE, dest, tag2, MPI_COMM_WORLD);
+				}
+				            
+                // ====== next iteration ====== 
                 from = i;
+                
+                /* 	Fix divisor, destination if a long jump is performed in the array 
+        		It is used for arrays that do not have at least one nz elem
+        		in their rows, therefore they might spoil the execution.*/
+                if (product >= 1){
+                	i --; // steile to i na ksanakanei thn epanalipsi
+                
+		    		//printf("HELLOprv: dest: %zd,divisor: %d\n\n", dest, divisor);
+		    		//for (int j_ = 0; j_ < product; j_++ ){
+		    		//	dest++;
+		    		//	divisor += num_rows_pp;
+		    		//}
+		    		//printf("HELLO: dest: %zd,divisor: %d\n\n", dest, divisor);
+        		}
+                dest++;
+                divisor += num_rows_pp;
             }
         }
+        /* send to last process */
+        chunksize = nnz - from;
+        printf("MASTER has sent to process %zd ", dest);
+        printf(" the array: ");
+        print_array(&val[from], chunksize);
+        MPI_Send(&chunksize, 1, MPI_INT, dest, tag1, MPI_COMM_WORLD);
+        //MPI_Send(&val[from], chunksize, MPI_DOUBLE, dest, tag2, MPI_COMM_WORLD);
+		
+        
 
-
-        printf("Sent %d elements to task %d offset= %d\n", chunksize, dest, offset);
+        printf("Sent %zd elements to task %d offset= %zd\n", chunksize, dest, offset);
 
         /* Master does its part of the work */
         offset = 0;
@@ -157,28 +231,31 @@ void parallel_tests(int numtasks, int argc, char *argv[])
 
     }  /* end of master section */
 
-
-
-    /***** Non-master tasks only *****/
+    /********************** Non-master tasks only *****************************/
 
     if (taskid > MASTER) {
 
-        int my_ex[2];
+        double *my_ex;
         /* Receive my portion of array from the master task */
+        
         source = MASTER;
         MPI_Recv(&offset, 1, MPI_INT, source, tag1, MPI_COMM_WORLD, &status);
-        MPI_Recv(&my_ex, chunksize, MPI_FLOAT, source, tag2,
-                    MPI_COMM_WORLD, &status);
+        printf("I process %d have received from process %d the offset %d\n",taskid, source, offset);
+        
+        //MPI_Recv(&my_ex, offset, MPI_DOUBLE, source, tag2,
+        //            MPI_COMM_WORLD, &status);
 
-        printf("process %d offset is %d: [%d, %d].\n", taskid, offset, my_ex[0], my_ex[1]);
-        my_ex[0] = offset;
-        my_ex[1] = offset;
+        //printf("process %d offset is %d: [%d, %d].\n", taskid, offset, my_ex[0], my_ex[1]);
+        //my_ex[0] = offset;
+        //my_ex[1] = offset;
 
+		//printf("process %d has received :", taskid);
+		//print_array(&my_ex, offset);
 
         /* Send my results back to the master task */
-        dest = MASTER;
-        MPI_Send(&offset, 1, MPI_INT, dest, tag1, MPI_COMM_WORLD);
-        MPI_Send(&my_ex, chunksize, MPI_FLOAT, MASTER, tag2, MPI_COMM_WORLD);
+        //dest = MASTER;
+        //MPI_Send(&offset, 1, MPI_INT, dest, tag1, MPI_COMM_WORLD);
+        //MPI_Send(&my_ex, chunksize, MPI_FLOAT, MASTER, tag2, MPI_COMM_WORLD);
 
 
     } /* end of non-master */
