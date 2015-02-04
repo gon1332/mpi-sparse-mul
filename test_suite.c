@@ -155,6 +155,8 @@ void parallel_tests(int numtasks, int argc, char *argv[])
         int num_rows_pp = size / numtasks;		
         printf("num_rows_pp : %d\n", num_rows_pp);
         
+        // ====================== distribution START ===========================
+        
         /* Send each task its portion of the array - master keeps 1st part */
     	size_t dest = 0;
         size_t from = 0;
@@ -184,20 +186,22 @@ void parallel_tests(int numtasks, int argc, char *argv[])
 		            
 		            if (chunksize > 0) {
 		            	MPI_Send(&val[from], chunksize, MPI_DOUBLE, dest, tag2, MPI_COMM_WORLD);
+		            	MPI_Send(&row_ind[from], chunksize, MPI_INT, dest, tag3, MPI_COMM_WORLD);
+		            	MPI_Send(&col_ind[from], chunksize, MPI_INT, dest, tag4, MPI_COMM_WORLD);
 		            }
 		            
 		            /* distribute array x */
-		            
+	            	MPI_Send(&x[divisor - num_rows_pp], num_rows_pp, 
+	            				MPI_INT, dest, tag5, MPI_COMM_WORLD);
 				}
 				            
                 // ====== next iteration ====== 
                 from = i;
-                
-                /* 	Fix divisor, destination if a long jump is performed in the array 
-        		It is used for arrays that do not have at least one nz elem
-        		in their rows, therefore they might spoil the execution.*/
-                if (product >= 1){
-                	// if there is a logic jump in row_ind array re-do the last iteration 
+
+                /* 	if there is a logic jump in row_ind array re-do the last iteration
+        			It is used for arrays that do not have at least one nz elem
+        			in their rows, therefore they might spoil the execution. */
+                if (product >= 1){  
                 	i --; 
         		}
                 dest++;
@@ -212,29 +216,16 @@ void parallel_tests(int numtasks, int argc, char *argv[])
         
         if (chunksize > 0) {
         	MPI_Send(&val[from], chunksize, MPI_DOUBLE, dest, tag2, MPI_COMM_WORLD);
+        	MPI_Send(&row_ind[from], chunksize, MPI_INT, dest, tag3, MPI_COMM_WORLD);
+		    MPI_Send(&col_ind[from], chunksize, MPI_INT, dest, tag4, MPI_COMM_WORLD);
         }
+        /* distribute array x */
+        MPI_Send(&x[divisor - num_rows_pp], num_rows_pp, MPI_INT, dest, tag5, MPI_COMM_WORLD);
         
-        //MPI_Send(&val[from], chunksize, MPI_DOUBLE, dest, tag2, MPI_COMM_WORLD);
+        // ========================== distribution END ========================
 		
        
-        printf("Sent %zd elements to task %d offset= %zd\n", chunksize, dest, offset);
-
-        /* Master does its part of the work */
-        //offset = 0;
-        //mysum = update(offset, chunksize, taskid);
-
-        /* Wait to receive results from each task */
-        /*
-        for (i = 1; i < numtasks; i++) {
-            source = i;
-            MPI_Recv(&offset, 1, MPI_INT, source, tag1, MPI_COMM_WORLD, &status);
-            MPI_Recv(&ex[offset], chunksize, MPI_INT, source, tag2, MPI_COMM_WORLD, &status);
-            printf("offset recved from %d is %d\n"
-                   "vector recved is [%d, %d]\n\n", i, offset, ex[offset], ex[offset+1]);
-        }
-        */
-
-        /* Get final sum and print sample results */
+        //printf("Sent %zd elements to task %d offset= %zd\n", chunksize, dest, offset);
 
     }  /* end of master section */
 
@@ -243,6 +234,9 @@ void parallel_tests(int numtasks, int argc, char *argv[])
     if (taskid > MASTER) {
 
         double *my_ex;
+        double *my_x;
+        int *row_ind;
+        int *col_ind;
         /* Receive my portion of array from the master task */
         
         source = MASTER;
@@ -255,7 +249,19 @@ void parallel_tests(int numtasks, int argc, char *argv[])
 
 			printf(" I process %d have received :", taskid);
 			print_array(&my_ex, chunksize);
+			
+			MPI_Recv(&row_ind, chunksize, MPI_INT, source, tag3, MPI_COMM_WORLD, &status);
+			MPI_Recv(&row_ind, chunksize, MPI_INT, source, tag4, MPI_COMM_WORLD, &status);
 		}
+		printf ("OKproc\n");
+		int num_rows_pp = 2;
+		
+		/* receive portion of array x */
+		MPI_Recv(&my_x, num_rows_pp, MPI_INT, source, tag5, MPI_COMM_WORLD, &status);
+		
+		printf(" I process %d have received the x :", taskid);
+		print_array(&my_x, num_rows_pp);
+		
         /* Send my results back to the master task */
         //dest = MASTER;
         //MPI_Send(&offset, 1, MPI_INT, dest, tag1, MPI_COMM_WORLD);
