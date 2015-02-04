@@ -67,12 +67,15 @@ void test_suite(void)
 }
 
 
-void print_array(double *array, size_t size);
+
+void print_array_int(int *array, size_t size);
+void print_array_double(double *array, size_t size);
+
 
 #define  MASTER		0
 void parallel_tests(int numtasks, int argc, char *argv[])
 {
-    int taskid, rc, dest, offset, i, tag1, tag2, tag3, tag4, tag5 , source, chunksize;
+    int taskid, rc, source, chunksize;
 
     MPI_Status status;
 
@@ -80,17 +83,18 @@ void parallel_tests(int numtasks, int argc, char *argv[])
     MPI_Init(&argc, &argv);
     MPI_Comm_size(MPI_COMM_WORLD, &numtasks);
     MPI_Comm_rank(MPI_COMM_WORLD, &taskid);
-    printf("MPI task %d has started...\n", taskid);
+    printf("[info]: MPI task %d has started...\n", taskid);
 
 	/* Tags are used to keep consistent and healthy flow of data during comm */
-	tag2 = 1;		// val_array
-    tag1 = 2;		// chuncksize
-    tag3 = 3;		// row_ind
-    tag4 = 4;		// col_ind
-    tag5 = 5;		// x multiplicator array
-    
+    int tag0 = 6;       // num_rows_pp
+    int tag1 = 2;		// chuncksize
+	int tag2 = 1;		// val_array
+    int tag3 = 3;		// row_ind
+    int tag4 = 4;		// col_ind
+    int tag5 = 5;		// x multiplicator array
+
 	/************************* Master task only *******************************/
-    
+
     if (taskid == MASTER) {
     	// ======================  TEST CASES  ================================
         // ===================== 1 =========================================
@@ -109,7 +113,12 @@ void parallel_tests(int numtasks, int argc, char *argv[])
         double y_sol[8] = {60., 0., 15., 36., 6., 0., 15., 16.};
 
         double y_res[8] = {0.};
-		
+
+        printf("[info]: Values are: ");
+        print_array_double(val, nnz);
+        printf("[info]: Vector is: ");
+        print_array_double(x, size);
+
 		// ======================== 2 =======================================
 		/*size_t size = 8;
         size_t nnz = 10;
@@ -147,92 +156,124 @@ void parallel_tests(int numtasks, int argc, char *argv[])
     	// ======================  TEST CASES  ================================
 
         if (size % numtasks != 0) {
-            printf("Quitting. Number of MPI tasks must be divisible by 4.\n");
+            printf("[info]: Quitting. Number of MPI tasks must be divisible by size.\n");
             MPI_Abort(MPI_COMM_WORLD, rc);
             exit(EXIT_FAILURE);
         }
+
         /* number of rows allocated to each process */
-        int num_rows_pp = size / numtasks;		
-        printf("num_rows_pp : %d\n", num_rows_pp);
-        
-        /* Send each task its portion of the array - master keeps 1st part */
-    	size_t dest = 0;
-        size_t from = 0;
+        int num_rows_pp = size / numtasks;
+        printf("[info]: Number of rows per process : %d\n", num_rows_pp);
+        printf("[info]: p0 is MASTER process.\n");
+
+
+    	int dest = 0;
+        int from = 0;
         int divisor = num_rows_pp;
         int product = 0;
+
+        /* -----------   START OF PROCESS DATA INITIALIZATION   ----------- */
+
+        /* Send each task its portion of the array - master keeps 1st part */
         for (size_t i = 0; i < nnz; i++) {
-        
+
         	product = row_ind[i] / divisor;
-        	
+
         	/* 	if row_ind[i] mod divisor == 0 then the array recognized so far 
-        		should be passed to the designated destination process and 
+        		should be passed to the designated destination process and
         		re-initialize the counters for the next array chunk  */
-            if ((row_ind[i]) % (divisor) == 0 || product > 1 ) {
-            	
+            if ((row_ind[i]) % (divisor) == 0 || product > 1) {
+
             	// the rows with value 0 --> we want to keep them in MASTER array
             	if (row_ind[i] == 0)
             		continue;				// ayto mporei kai na fygei
-            	
-	        	if (dest != MASTER){
-		            size_t chunksize = i - from;
-		            printf("MASTER has sent to process %zd the array: ", dest);
-		            print_array(&val[from], chunksize);
-		            printf("\n");
 
-					/* number of elements to be sent */
+	        	if (dest != MASTER) {
+		            size_t chunksize = i - from;
+
+                    /* send META info like chunksize and number of rows per process */
+		            MPI_Send(&num_rows_pp, 1, MPI_INT, dest, tag0, MPI_COMM_WORLD);
+                    printf("[comm@%s](p0 --> p%d) num_rows_pp : %d\n", __TIME__, dest, num_rows_pp);
+
 		            MPI_Send(&chunksize, 1, MPI_INT, dest, tag1, MPI_COMM_WORLD);
-		            
+                    printf("[comm@%s](p0 --> p%d) chunksize : %zd\n", __TIME__, dest, chunksize);
+
 		            if (chunksize > 0) {
 		            	MPI_Send(&val[from], chunksize, MPI_DOUBLE, dest, tag2, MPI_COMM_WORLD);
+                        printf("[comm@%s](p0 --> p%d) val : ", __TIME__, dest);
+                        print_array_double(&val[from], chunksize);
+
+		            	MPI_Send(&row_ind[from], chunksize, MPI_INT, dest, tag3, MPI_COMM_WORLD);
+                        printf("[comm@%s](p0 --> p%d) row_ind : ", __TIME__, dest);
+                        print_array_int(&row_ind[from], chunksize);
+
+		            	MPI_Send(&col_ind[from], chunksize, MPI_INT, dest, tag4, MPI_COMM_WORLD);
+                        printf("[comm@%s](p0 --> p%d) col_ind : ", __TIME__, dest);
+                        print_array_int(&row_ind[from], chunksize);
 		            }
-		            
-		            /* distribute array x */
-		            
+
+		            /* distribute vector x */
+                    MPI_Send(&x[divisor - num_rows_pp], num_rows_pp, MPI_INT,
+                             dest, tag5, MPI_COMM_WORLD);
+
 				}
-				            
-                // ====== next iteration ====== 
+
+                // ====== next iteration ======
                 from = i;
-                
-                /* 	Fix divisor, destination if a long jump is performed in the array 
+
+                /* 	Fix divisor, destination if a long jump is performed in the array
         		It is used for arrays that do not have at least one nz elem
         		in their rows, therefore they might spoil the execution.*/
-                if (product >= 1){
-                	// if there is a logic jump in row_ind array re-do the last iteration 
-                	i --; 
+                if (product >= 1) {
+                	// if there is a logic jump in row_ind array re-do the last iteration
+                	i--;
         		}
                 dest++;
                 divisor += num_rows_pp;
             }
         }
-        /*** send to last process ***/
-        chunksize = nnz - from;
-        printf("MASTER has sent to process %zd the array: ", dest);
-        print_array(&val[from], chunksize);
-        MPI_Send(&chunksize, 1, MPI_INT, dest, tag1, MPI_COMM_WORLD);
-        
-        if (chunksize > 0) {
-        	MPI_Send(&val[from], chunksize, MPI_DOUBLE, dest, tag2, MPI_COMM_WORLD);
-        }
-        
-        //MPI_Send(&val[from], chunksize, MPI_DOUBLE, dest, tag2, MPI_COMM_WORLD);
-		
-       
-        printf("Sent %zd elements to task %d offset= %zd\n", chunksize, dest, offset);
 
-        /* Master does its part of the work */
-        //offset = 0;
-        //mysum = update(offset, chunksize, taskid);
+        /* send to last process */
+        if (dest < numtasks) {
+            chunksize = nnz - from;
 
-        /* Wait to receive results from each task */
-        /*
-        for (i = 1; i < numtasks; i++) {
-            source = i;
-            MPI_Recv(&offset, 1, MPI_INT, source, tag1, MPI_COMM_WORLD, &status);
-            MPI_Recv(&ex[offset], chunksize, MPI_INT, source, tag2, MPI_COMM_WORLD, &status);
-            printf("offset recved from %d is %d\n"
-                   "vector recved is [%d, %d]\n\n", i, offset, ex[offset], ex[offset+1]);
+            MPI_Send(&num_rows_pp, 1, MPI_INT, dest, tag0, MPI_COMM_WORLD);
+            printf("[comm@%s](p0 --> p%d) num_rows_pp : %d\n", __TIME__, dest, num_rows_pp);
+            MPI_Send(&chunksize, 1, MPI_INT, dest, tag1, MPI_COMM_WORLD);
+            printf("[comm@%s](p0 --> p%d) chunksize : %d\n", __TIME__, dest, chunksize);
+
+            if (chunksize > 0) {
+                MPI_Send(&val[from], chunksize, MPI_DOUBLE, dest, tag2, MPI_COMM_WORLD);
+                printf("[comm@%s](p0 --> p%d) val : ", __TIME__, dest);
+                print_array_double(&val[from], chunksize);
+
+                MPI_Send(&row_ind[from], chunksize, MPI_INT, dest, tag3, MPI_COMM_WORLD);
+                printf("[comm@%s](p0 --> p%d) row_ind : ", __TIME__, dest);
+                print_array_int(&row_ind[from], chunksize);
+
+                MPI_Send(&col_ind[from], chunksize, MPI_INT, dest, tag4, MPI_COMM_WORLD);
+                printf("[comm@%s](p0 --> p%d) col_ind : ", __TIME__, dest);
+                print_array_int(&col_ind[from], chunksize);
+            }
+
+            /* distribute vector x */
+            MPI_Send(&x[divisor - num_rows_pp], num_rows_pp, MPI_DOUBLE, dest, tag5, MPI_COMM_WORLD);
         }
-        */
+        /* ------------   END OF PROCESS DATA INITIALIZATION   ------------ */
+
+
+        /* -------   START OF REORDERING THE DATA TO LOCAL/GLOBAL   ------- */
+
+        // Generally the process p will have locally the
+        // [p*num_rows_pp, p*num_rows_pp+num_rows_pp) columns
+        printf("[p%d]: My private area is the block [(%d,%d), (%d,%d)]\n",
+               taskid, taskid*num_rows_pp, taskid*num_rows_pp,
+               taskid*num_rows_pp+num_rows_pp, taskid*num_rows_pp+num_rows_pp);
+
+
+        /* --------   END OF REORDERING THE DATA TO LOCAL/GLOBAL   -------- */
+
+
 
         /* Get final sum and print sample results */
 
@@ -242,25 +283,56 @@ void parallel_tests(int numtasks, int argc, char *argv[])
 
     if (taskid > MASTER) {
 
-        double *my_ex;
+        double *my_val;
+        double *my_x;
+        int *my_row_ind;
+        int *my_col_ind;
+        int num_rows_pp;
+
         /* Receive my portion of array from the master task */
-        
         source = MASTER;
+        MPI_Recv(&num_rows_pp, 1, MPI_INT, source, tag0, MPI_COMM_WORLD, &status);
+        printf("[comm@%s](p%d <-- p%d) num_rows_pp: %d\n", __TIME__, taskid, source, num_rows_pp);
+
         MPI_Recv(&chunksize, 1, MPI_INT, source, tag1, MPI_COMM_WORLD, &status);
-        printf("I process %d have received from process %d the chunksize %d\n",
-        		taskid, source, chunksize);
-        
-        if  (chunksize > 0){
-        	MPI_Recv(&my_ex, chunksize, MPI_DOUBLE, source, tag2, MPI_COMM_WORLD, &status);
+        printf("[comm@%s](p%d <-- p%d) chunksize: %d\n", __TIME__, taskid, source, chunksize);
 
-			printf(" I process %d have received :", taskid);
-			print_array(&my_ex, chunksize);
+        if (chunksize > 0){
+            // Receive values array
+        	MPI_Recv(&my_val, chunksize, MPI_DOUBLE, source, tag2, MPI_COMM_WORLD, &status);
+			printf("[comm@%s](p%d <-- p%d) val : ", __TIME__, taskid, source);
+			print_array_double(&my_val, chunksize);
+
+            // Receive row indeces array
+            MPI_Recv(&my_row_ind, chunksize, MPI_INT, source, tag3, MPI_COMM_WORLD, &status);
+			printf("[comm@%s](p%d <-- p%d) row_ind : ", __TIME__, taskid, source);
+			print_array_int(&my_row_ind, chunksize);
+
+            // Receive column indeces array
+			MPI_Recv(&my_col_ind, chunksize, MPI_INT, source, tag4, MPI_COMM_WORLD, &status);
+			printf("[comm@%s](p%d <-- p%d) col_ind : ", __TIME__, taskid, source);
+			print_array_int(&my_col_ind, chunksize);
+
 		}
-        /* Send my results back to the master task */
-        //dest = MASTER;
-        //MPI_Send(&offset, 1, MPI_INT, dest, tag1, MPI_COMM_WORLD);
-        //MPI_Send(&my_ex, chunksize, MPI_FLOAT, MASTER, tag2, MPI_COMM_WORLD);
 
+        /* receive portion of array x */
+		MPI_Recv(&my_x, num_rows_pp, MPI_DOUBLE, source, tag5, MPI_COMM_WORLD, &status);
+		printf("[comm@%s](p%d <-- p%d) x : ", __TIME__, taskid, source);
+		print_array_double(&my_x, num_rows_pp);
+
+
+        /* -------   START OF REORDERING THE DATA TO LOCAL/GLOBAL   ------- */
+
+        // Generally the process p will have locally the
+        // [p*num_rows_pp, p*num_rows_pp+num_rows_pp) columns
+        printf("[p%d]: My private area is the block [(%d,%d), (%d,%d)]\n",
+               taskid, taskid*num_rows_pp, taskid*num_rows_pp,
+               taskid*num_rows_pp+num_rows_pp, taskid*num_rows_pp+num_rows_pp);
+
+        int private_from = taskid * num_rows_pp;
+        int private_to   = taskid * num_rows_pp + num_rows_pp;
+
+        /* --------   END OF REORDERING THE DATA TO LOCAL/GLOBAL   -------- */
 
     } /* end of non-master */
 
@@ -280,11 +352,21 @@ void parallel_tests(int numtasks, int argc, char *argv[])
     MPI_Finalize();
 }
 
-void print_array(double *array, size_t size)
+void print_array_double(double *array, size_t size)
 {
     printf("[ ");
     for (size_t i = 0; i < size; i++) {
-        printf("%lf ", array[i]);
+        printf("%g, ", array[i]);
+    }
+    printf("]\n");
+}
+
+
+void print_array_int(int *array, size_t size)
+{
+    printf("[ ");
+    for (size_t i = 0; i < size; i++) {
+        printf("%i, ", array[i]);
     }
     printf("]\n");
 }
