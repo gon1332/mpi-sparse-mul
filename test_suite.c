@@ -3,7 +3,26 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <math.h>
+#include <stdbool.h>
 #include "mpi.h"
+
+#define ACCURACY 14
+
+/* Returns true if they are equal.
+ *
+ */
+static bool vec_compare(const double *const v1,
+                        const double *const v2,
+                        size_t size)
+{
+    size_t count = 0;
+    for (size_t i = 0; i < size; i++) {
+        count += fabs(v1[i] - v2[i]) <= ACCURACY;
+    }
+    printf("\ncount: %lu\n", count);
+    return count == size;
+}
 
 void test_suite(void)
 {
@@ -92,7 +111,7 @@ void parallel_tests(int numtasks, int argc, char *argv[])
     int tag3 = 3;		// row_ind
     int tag4 = 4;		// col_ind
     int tag5 = 5;		// x multiplicator array
-    int tag6 = 7;		// request for a non-private block
+    int tag6 = 7;		// y result from each process
 
     double x[8]     = { 1., 3.,  6.,  2., 1., 0.,  5.,  3.};
 	/************************* Master task only *******************************/
@@ -298,16 +317,6 @@ void parallel_tests(int numtasks, int argc, char *argv[])
         double y[size];
         memset(y, 0, size * sizeof(double));
 
-        /*
-        for (int i = 0; i < numtasks; i++) {
-            // Calculate my private region
-            if (i == taskid) {
-                for (int k = 0; k < num_rows_pp; k++) {
-                    y[row_ind[k]] = val[k] * x[col_ind[k]];
-                }
-            }
-        }*/
-
         for (size_t i = 0; i < chunksize; i++) {
             y[row_ind[i]] += val[i] * x[col_ind[i]];
             printf(">> y[%d] = %g * %g\n", row_ind[i], val[i], x[col_ind[i]]);
@@ -315,8 +324,20 @@ void parallel_tests(int numtasks, int argc, char *argv[])
         printf("[p0]: y: ");
         print_array_double(y, num_rows_pp);
 
-        /* Get final sum and print sample results */
 
+        /* Get final sum and print sample results */
+        for (int i = 1; i < numtasks; i++) {
+            MPI_Recv(&y[i*num_rows_pp], num_rows_pp, MPI_DOUBLE, i, tag6, MPI_COMM_WORLD, &status);
+        }
+
+        printf("[p0]: I'm master and I have the final result which lies in y: ");
+        print_array_double(y, size);
+
+        if (vec_compare(y, y_sol, size)) {
+            puts("[TEST 1] *** SUCCESS ***");
+        } else {
+            puts("[TEST 1] !!! FAILURE !!!");
+        }
     }  /* end of master section */
 
     /********************** Non-master tasks only *****************************/
@@ -390,26 +411,13 @@ void parallel_tests(int numtasks, int argc, char *argv[])
         double my_y[num_rows_pp];
         memset(my_y, 0, chunksize * sizeof(double));
 
-
-        /*
-        for (int i = 0; i < numtasks; i++) {
-            // Calculate my private region
-            if (i == taskid) {
-                for (int k = 0; k < num_rows_pp; k++) {
-                    my_y[my_row_ind[k]-num_rows_pp] = my_val[k] * my_x[my_col_ind[k]-num_rows_pp];
-                    printf(">> y = %g * %g\n", my_val[k], my_x[my_col_ind[k]-num_rows_pp]);
-                }
-            }
-        }
-        */
-
-        for (size_t i = 0; i < chunksize; i++) {
+        for (size_t i = 0; i < (size_t)chunksize; i++) {
             my_y[my_row_ind[i] - num_rows_pp*taskid] += my_val[i] * x[my_col_ind[i]];
         }
         printf("[p%d]: y: ", taskid);
         print_array_double(my_y, num_rows_pp);
 
-        //MPI_Bcast(my_x, num_rows_pp, MPI_INT, taskid, MPI_COMM_WORLD);
+        MPI_Send(my_y, num_rows_pp, MPI_DOUBLE, MASTER, tag6, MPI_COMM_WORLD);
 
     } /* end of non-master */
 
