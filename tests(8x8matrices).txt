@@ -1,0 +1,56 @@
+// ===================== 1 =========================================
+        /*size_t size = 8;
+        size_t nnz = 14;
+        coo_matrix_T test = coo_matrix_new(size, nnz);
+
+        double val[14]     = {6., 9., 4., 4., 5., 3., 5., 8., 6., 5., 4., 3., 2., 2.};
+        int col_ind[14] = {0,  2,  5,  5,  1,  2,  3,  4,  4,  5,  5,  6,  6,  7};
+        int row_ind[14] = {0,  0,  0,  1,  2,  3,  3,  3,  4,  5,  6,  6,  7,  7};
+        coo_matrix_init_values(test, val);
+        coo_matrix_init_columns(test, col_ind);
+        coo_matrix_init_rows(test, row_ind);
+
+		double y_sol[8] = {60., 0., 15., 36., 6., 0., 15., 16.};
+        double y_sol[8] = {60., 0., 15., 36., 6., 0., 15., 16.};
+
+        double y_res[8] = {0.};
+
+        printf("[info]: Values are: ");
+        print_array_double(val, nnz);
+        printf("[info]: Vector is: ");
+        print_array_double(x, size);
+		*/
+		// ======================== 2 =======================================
+		/*size_t size = 8;
+        size_t nnz = 10;
+        coo_matrix_T test = coo_matrix_new(size, nnz);
+
+        double val[14]     = {6., 9., 4., 4., 6., 5., 4., 3., 2., 2.};
+        size_t col_ind[14] = {0,  2,  5,  5,  4,  5,  5,  6,  6,  7};
+        size_t row_ind[14] = {0,  0,  0,  1,  4,  5,  6,  6,  7,  7};
+        coo_matrix_init_values(test, val);
+        coo_matrix_init_columns(test, col_ind);
+        coo_matrix_init_rows(test, row_ind);
+
+        double x[8]     = { 1., 3.,  6.,  2., 1., 0.,  5.,  3.};
+        double y_sol[8] = {60., 0., 15., 36., 6., 0., 15., 16.};
+
+        double y_res[8] = {0.};
+		*/
+		// ======================== 3 =======================================
+		/*size_t size = 8;
+        size_t nnz = 6;
+        coo_matrix_T test = coo_matrix_new(size, nnz);
+
+        double val[14]     = { 6., 5., 4., 3., 2., 2.};
+        size_t col_ind[14] = {  4,  5,  5,  6,  6,  7};
+        size_t row_ind[14] = {  4,  5,  6,  6,  7,  7};
+        coo_matrix_init_values(test, val);
+        coo_matrix_init_columns(test, col_ind);
+        coo_matrix_init_rows(test, row_ind);
+
+        double x[8]     = { 1., 3.,  6.,  2., 1., 0.,  5.,  3.};
+        double y_sol[8] = {60., 0., 15., 36., 6., 0., 15., 16.};
+
+        double y_res[8] = {0.};
+		*/
