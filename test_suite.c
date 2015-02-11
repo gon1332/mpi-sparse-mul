@@ -133,11 +133,12 @@ void parallel_tests(int numtasks, int argc, char *argv[])
         // ===================== .mtx format read =============================
 		// input .mtx file name
         //char filename[] = "./arrays/matrix_test.mtx";
-        //char filename[] = "./arrays/fidapm11.mtx";
+        //char filename[] = "./arrays/fidapm11_edited.mtx";
         //char filename[] = "./arrays/utm300.mtx";
+        //char filename[] = ".arrays/bcsstk30.mtx";
         char filename[] = "./arrays/utm3060.mtx";
         //char filename[] = "./arrays/conf6_0_00l8x8_8000.mtx";
-        //char filename[] = ".arrays/bcsstk30.mtx";
+        //char filename[] = "./arrays/jumper_start.mtx";
 
 		/* Information to be returned
 			I: row_ind
@@ -335,7 +336,6 @@ void parallel_tests(int numtasks, int argc, char *argv[])
 
         size_t chunksize = temp_chunksize;
 
-
         t = clock() - t;
         printf("[========= 100%% =========] Data distribution & sent it. (%g sec)\n",
                 ((float)t)/CLOCKS_PER_SEC);
@@ -434,14 +434,13 @@ void parallel_tests(int numtasks, int argc, char *argv[])
 #endif
         //
         /* ------------   END OF PROCESS DATA INITIALIZATION   ------------ */
-
-
         double my_y[num_rows_pp];
-        memset(my_y, 0, chunksize * sizeof(double));
+        memset(my_y, 0, num_rows_pp * sizeof(double));
 
         for (size_t i = 0; i < (size_t)chunksize; i++) {
             my_y[my_row_ind[i] - num_rows_pp*taskid] += my_val[i] * x[my_col_ind[i]];
         }
+
 #ifdef DEBUG
         printf("[p%d]: y: ", taskid);
         print_array_double(my_y, num_rows_pp);
@@ -450,17 +449,6 @@ void parallel_tests(int numtasks, int argc, char *argv[])
         MPI_Send(my_y, num_rows_pp, MPI_DOUBLE, MASTER, tag6, MPI_COMM_WORLD);
 
     } /* end of non-master */
-
-// FOR MASTER
-    /*
-    coo_matrix_vector_mul(test, x, y_res);
-
-    if (!memcmp(y_res, y_sol, size * sizeof(double))) {
-        puts("[TEST 2] *** SUCCESS ***");
-    } else {
-        puts("[TEST 2] !!! FAILURE !!!");
-    }
-    */
 
     // coo_matrix_delete(test);
 
