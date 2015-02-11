@@ -91,6 +91,7 @@ void test_suite(void)
 
 void print_array_int(int *array, size_t size);
 void print_array_double(double *array, size_t size);
+void print_array_double_result(double *array, size_t size);
 
 
 #define  MASTER		0
@@ -127,9 +128,9 @@ void parallel_tests(int numtasks, int argc, char *argv[])
         //char filename[] = "./arrays/matrix_test.mtx";
         //char filename[] = "./arrays/fidapm11.mtx";
         //char filename[] = "./arrays/utm300.mtx";
-        //char filename[] = "./arrays/utm3060.mtx";
+        char filename[] = "./arrays/utm3060.mtx";
         //char filename[] = "./arrays/conf6_0_00l8x8_8000.mtx";
-        char filename[] = ".arrays/bcsstk30.mtx";
+        //char filename[] = ".arrays/bcsstk30.mtx";
 
 		/* Information to be returned
 			I: row_ind
@@ -337,7 +338,7 @@ void parallel_tests(int numtasks, int argc, char *argv[])
         }
 
         printf("[p0]: I'm master and I have the final result which lies in y: ");
-        print_array_double(y, size);
+        print_array_double_result(y, size);
 
 		/*
         if (vec_compare(y, y_sol, size)) {
@@ -458,6 +459,14 @@ void print_array_double(double *array, size_t size)
     printf("]\n");
 }
 
+void print_array_double_result(double *array, size_t size)
+{
+    printf("[\n");
+    for (size_t i = 0; i < size; i++) {
+        printf("y[%zd] = %g\n", i, array[i]);
+    }
+    printf("]\n");
+}
 
 void print_array_int(int *array, size_t size)
 {
