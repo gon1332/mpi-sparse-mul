@@ -91,7 +91,6 @@ void test_suite(void)
 
 void print_array_int(int *array, size_t size);
 void print_array_double(double *array, size_t size);
-void print_array_double_result(double *array, size_t size);
 
 
 #define  MASTER		0
@@ -126,26 +125,17 @@ void parallel_tests(int numtasks, int argc, char *argv[])
 
         // ===================== .mtx format read =============================
 		// input .mtx file name
-<<<<<<< HEAD
         //char filename[] = "./arrays/matrix_test.mtx";
-        //char filename[] = "./arrays/fidapm11.mtx";
-        //char filename[] = "./arrays/utm300.mtx";
-        char filename[] = "./arrays/utm3060.mtx";
-        //char filename[] = "./arrays/conf6_0_00l8x8_8000.mtx";
-        //char filename[] = ".arrays/bcsstk30.mtx";
+        char filename[] = "./arrays/utm_3060.mtx";
+        //char filename[] = "./arrays/fidapm11_edited.mtx";
 
-=======
-        //char filename[] = "./arrays/matrix_test.mtx";//"fidapm11.mtx" ;
-        char filename[] = "./arrays/fidapm11_edited.mtx";
-        
         /*
         // "conf6_0_00l8x8_8000.mtx"
         // "fidapm11_edited.mtx"
         */
-        
->>>>>>> 5e5e514f0de451ab1d0963a3774fc8a9fd4c265e
+
 		/* Information to be returned
-			I: row_ind
+			I: row_ind 
 			J: col_ind
 		 	val: array values
 		 	nz: number of non-zero elements.
@@ -156,23 +146,6 @@ void parallel_tests(int numtasks, int argc, char *argv[])
 		int size;
 
         nnz = readMtx(filename, &I, &J, &vall, &size);
-<<<<<<< HEAD
-        printf("Number of Non-zero elements %d\n",nnz);
-
-        /*
-        for (int i=0; i < nnz; i++){
-    		fprintf(stdout, "P0 input : %d %d %20.19g\n", I[i] + 1, J[i] + 1, vall[i]);
-    	}
-    	fflush(stdout);
-*/
-		/*	COO Format characteristics	*/
-		printf("The size of the matrix is: %d\n", size);
-
-		int *row_ind, *col_ind;
-		double *val;
-		row_ind = J;
-		col_ind = I;
-=======
         printf("--Number of Non-zero elements %d\n",nnz);
         
         /* Print output matrix (optional) */
@@ -188,36 +161,17 @@ void parallel_tests(int numtasks, int argc, char *argv[])
 		double *val;
 		col_ind = I;
 		row_ind = J;
->>>>>>> 5e5e514f0de451ab1d0963a3774fc8a9fd4c265e
 		val = vall;
-
-		for (int i = 0; i < nnz; i++){
+		
+		for (int i=0; i < nnz; i++){
 			row_ind[i] = row_ind[i] + 1;
 			col_ind[i] = col_ind[i] + 1;
     	}
-<<<<<<< HEAD
-
-		x = malloc(size*sizeof(double));
-
-=======
 		
->>>>>>> 5e5e514f0de451ab1d0963a3774fc8a9fd4c265e
 		// initialize array x
 		x = malloc(size*sizeof(double));
 		
 		srand(time(NULL));
-<<<<<<< HEAD
-		for (size_t i = 0; i < (size_t)size; i++){
-			//x[i] = rand() % RRANGE + 1.0;
-			x[i] = rand() % RRANGE + 1.0;
-		}
-		/*	COO Format characteristics	*/
-
-		//double x_[8]     = { 1., 3.,  6.,  2., 1., 0.,  5.,  3.};
-		//x = x_;
-        printf("Alles Gut\n");
-
-=======
 		for (int i=0; i < size; i++){
 			x[i] = 1.0; //rand() % RRANGE + 1.0;
 		}
@@ -226,7 +180,6 @@ void parallel_tests(int numtasks, int argc, char *argv[])
 		//double x_[8]     = { 1., 3.,  6.,  2., 1., 0.,  5.,  3.};
 		//x = x_;
 		
->>>>>>> 5e5e514f0de451ab1d0963a3774fc8a9fd4c265e
     	// ======================  TEST CASES  ================================
 
 		/* N (size of array) must be divisible by number of tasks */
@@ -236,109 +189,6 @@ void parallel_tests(int numtasks, int argc, char *argv[])
             exit(EXIT_FAILURE);
         }
 
-<<<<<<< HEAD
-        /* number of rows allocated to each process */
-        int num_rows_pp = size / numtasks;
-        printf("[info]: Number of rows per process : %d\n", num_rows_pp);
-        printf("[info]: p0 is MASTER process.\n");
-
-		/* -----------   START OF PROCESS DATA INITIALIZATION   ----------- */
-
-    	int dest = 0;
-        int from = 0;
-        int divisor = num_rows_pp;
-        int product = 0;
-        size_t temp_chunksize = 0;
-
-        /* Send each task its portion of the array - master keeps 1st part */
-        for (size_t i = 0; i < (size_t)nnz; i++) {
-
-        	product = row_ind[i] / divisor;
-
-        	/* if row_ind[i] mod divisor == 0 then the array recognized so far
-        	   should be passed to the designated destination process and
-        	   re-initialize the counters for the next array chunk
-            */
-            if ((row_ind[i]) % (divisor) == 0 || product > 1) {
-
-                if (dest == MASTER) {
-                    temp_chunksize = i;
-                }
-
-            	// the rows with value 0 --> we want to keep them in MASTER array
-            	if (row_ind[i] == 0)
-            		continue;				// ayto mporei kai na fygei
-
-	        	if (dest != MASTER) {
-		            size_t chunksize = i - from;
-
-                    /* send META info like chunksize and number of rows per process */
-		            MPI_Send(&num_rows_pp, 1, MPI_INT, dest, tag0, MPI_COMM_WORLD);
-                    printf("[comm@%s](p0 --> p%d) num_rows_pp : %d\n", __TIME__, dest, num_rows_pp);
-
-		            MPI_Send(&chunksize, 1, MPI_INT, dest, tag1, MPI_COMM_WORLD);
-                    printf("[comm@%s](p0 --> p%d) chunksize : %zd\n", __TIME__, dest, chunksize);
-
-		            if (chunksize > 0) {
-		            	MPI_Send(&val[from], chunksize, MPI_DOUBLE, dest, tag2, MPI_COMM_WORLD);
-                        printf("[comm@%s](p0 --> p%d) val : ", __TIME__, dest);
-                        print_array_double(&val[from], chunksize);
-
-		            	MPI_Send(&row_ind[from], chunksize, MPI_INT, dest, tag3, MPI_COMM_WORLD);
-                        printf("[comm@%s](p0 --> p%d) row_ind : ", __TIME__, dest);
-                        print_array_int(row_ind+from, chunksize);
-
-		            	MPI_Send(&col_ind[from], chunksize, MPI_INT, dest, tag4, MPI_COMM_WORLD);
-                        printf("[comm@%s](p0 --> p%d) col_ind : ", __TIME__, dest);
-                        print_array_int(col_ind+from, chunksize);
-		            }
-
-		            /* distribute vector x ---->> EDIT distribute whole vector*/
-                    MPI_Send(&x[0], size, MPI_DOUBLE,
-                             dest, tag5, MPI_COMM_WORLD);
-                    printf("[comm@%s](p0 --> p%d) x : ", __TIME__, dest);
-                    print_array_double(&x[0], size);
-
-				}
-
-                // ====== next iteration ======
-                from = i;
-
-                /* Fix divisor, destination if a long jump is performed in the
-                   array. It is used for arrays that do not have at least one nz
-                   elem in their rows, therefore they might spoil the execution.
-                */
-                if (product >= 1) {
-                	// if there is a logic jump in row_ind array re-do the last iteration
-                	i--;
-        		}
-                dest++;
-                divisor += num_rows_pp;
-            }
-        }
-
-        /* send to last process */
-        if (dest < numtasks) {
-            size_t chunksize = nnz - from;
-
-            MPI_Send(&num_rows_pp, 1, MPI_INT, dest, tag0, MPI_COMM_WORLD);
-            printf("[comm@%s](p0 --> p%d) num_rows_pp : %d\n", __TIME__, dest, num_rows_pp);
-            MPI_Send(&chunksize, 1, MPI_INT, dest, tag1, MPI_COMM_WORLD);
-            printf("[comm@%s](p0 --> p%d) chunksize : %zd\n", __TIME__, dest, chunksize);
-
-            if (chunksize > 0) {
-                MPI_Send(&val[from], chunksize, MPI_DOUBLE, dest, tag2, MPI_COMM_WORLD);
-                printf("[comm@%s](p0 --> p%d) val : ", __TIME__, dest);
-                print_array_double(&val[from], chunksize);
-
-                MPI_Send(&row_ind[from], chunksize, MPI_INT, dest, tag3, MPI_COMM_WORLD);
-                printf("[comm@%s](p0 --> p%d) row_ind : ", __TIME__, dest);
-                print_array_int(row_ind+from, chunksize);
-
-                MPI_Send(&col_ind[from], chunksize, MPI_INT, dest, tag4, MPI_COMM_WORLD);
-                printf("[comm@%s](p0 --> p%d) col_ind : ", __TIME__, dest);
-                print_array_int(col_ind+from, chunksize);
-=======
 		/* -----------   START OF PROCESS DATA INITIALIZATION   ------------- */
     	
 		/******************* ex3  ARRAY DISTRIBUTION START ********************/
@@ -421,7 +271,6 @@ void parallel_tests(int numtasks, int argc, char *argv[])
             	MPI_Send(&col_ind[elements_distributed], total_elements[i], MPI_INT, i, tag4, MPI_COMM_WORLD);
                 //printf("[comm@%s](p0 --> p%d) col_ind : ", __TIME__, i);
                 //print_array_int(&col_ind[elements_distributed], total_elements[i]);
->>>>>>> 5e5e514f0de451ab1d0963a3774fc8a9fd4c265e
             }
             
             /* distribute vector x ---->> EDIT distribute whole vector*/
@@ -560,18 +409,6 @@ void print_array_double(double *array, size_t size)
     printf("]\n");
 }
 
-<<<<<<< HEAD
-void print_array_double_result(double *array, size_t size)
-{
-    printf("[\n");
-    for (size_t i = 0; i < size; i++) {
-        printf("y[%zd] = %g\n", i, array[i]);
-    }
-    printf("]\n");
-}
-
-=======
->>>>>>> 5e5e514f0de451ab1d0963a3774fc8a9fd4c265e
 void print_array_int(int *array, size_t size)
 {
     printf("[ ");
@@ -591,7 +428,7 @@ void print_array_double_result(double *array, size_t size)
 }
 
 /*	int readMtx( FILE *f )
-		Read .mtx files
+		Read .mtx files 
 		Returns the number of nonzero elems (directly)
 		Returns the row_ind, col_ind, val 	(indirecly)
  */
@@ -600,16 +437,16 @@ int readMtx( char filename[], int **Ii, int **Ji, double **vali, int *size )
     int ret_code;
     MM_typecode matcode;
     FILE *f;
-
+    
     int M, N;
-    int nz = 0;
+    int nz = 0;  
     int i;
     int *I, *J;
     double *val;
-
-    // Read File
-
-	if ((f = fopen(filename, "r")) == NULL)
+    
+	// Read File
+         
+	if ((f = fopen(filename, "r")) == NULL) 
 		exit(1);
 
     if (mm_read_banner(f, &matcode) != 0)
@@ -617,18 +454,18 @@ int readMtx( char filename[], int **Ii, int **Ji, double **vali, int *size )
         printf("Could not process Matrix Market banner.\n");
         exit(1);
     }
-
+    
     /*  This is how one can screen matrix types if their application */
     /*  only supports a subset of the Matrix Market data types.      */
 
-    if (mm_is_complex(matcode) && mm_is_matrix(matcode) &&
+    if (mm_is_complex(matcode) && mm_is_matrix(matcode) && 
             mm_is_sparse(matcode) )
     {
         printf("Sorry, this application does not support ");
         printf("Market Market type: [%s]\n", mm_typecode_to_str(matcode));
         exit(1);
     }
-
+    
     /* find out size of sparse matrix .... */
 
     if ((ret_code = mm_read_mtx_crd_size(f, &M, &N, &nz)) !=0)
@@ -651,7 +488,7 @@ int readMtx( char filename[], int **Ii, int **Ji, double **vali, int *size )
         J[i]--;
     }
 
-    if (f !=stdin)
+    if (f !=stdin) 
     	fclose(f);
 
     /************************/
@@ -664,11 +501,14 @@ int readMtx( char filename[], int **Ii, int **Ji, double **vali, int *size )
     //    fprintf(stdout, "Lala : %d %d %20.19g\n", I[i]+1, J[i]+1, val[i]);
     //    fflush(stdout);
     //}
-
+    
     *Ii = I;
     *Ji = J;
-    *vali = val;
+    *vali = val; 
 	*size = N;
-
+	 
 	return nz;
 }
+
+
+
