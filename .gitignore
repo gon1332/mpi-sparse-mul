@@ -2,6 +2,7 @@
 TODO
 serial
 *~
+*.swp
 
 # Object files
 *.o
