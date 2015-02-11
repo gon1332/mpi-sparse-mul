@@ -344,7 +344,7 @@ void parallel_tests(int numtasks, int argc, char *argv[])
                 ((float)t)/CLOCKS_PER_SEC);
 
         t_total = clock() - t_total;
-        printf("[========= 100%% =========] Gather the final result. (%g sec)\n",
+        printf("[========= 100%% =========] Overall execution. (%g sec)\n",
                 ((float)t_total)/CLOCKS_PER_SEC);
     }	/* end of master section */
 
@@ -355,13 +355,13 @@ void parallel_tests(int numtasks, int argc, char *argv[])
         int num_rows_pp;
         int chunksize;
 		int size;
-	
+
         /* Receive my portion of array from the master task */
         source = MASTER;
-        
+
         MPI_Recv(&size, 1, MPI_INT, source, tagx, MPI_COMM_WORLD, &status);
         printf("[comm@%s](p%d <-- p%d) size N: %d\n", __TIME__, taskid, source, size);
-        
+
         MPI_Recv(&num_rows_pp, 1, MPI_INT, source, tag0, MPI_COMM_WORLD, &status);
         printf("[comm@%s](p%d <-- p%d) num_rows_p: %d\n", __TIME__, taskid, source, num_rows_pp);
 
@@ -398,16 +398,16 @@ void parallel_tests(int numtasks, int argc, char *argv[])
 		//print_array_double(x, size);
         //
         /* ------------   END OF PROCESS DATA INITIALIZATION   ------------ */
-		
+
         double my_y[num_rows_pp];
         memset(my_y, 0, num_rows_pp * sizeof(double));
-        
+
         for (int i = 0; i < chunksize; i++) {
- 			my_y[my_row_ind[i] - my_row_ind[0]] += my_val[i] * x[my_col_ind[i]];    
- 			
+ 			my_y[my_row_ind[i] - my_row_ind[0]] += my_val[i] * x[my_col_ind[i]];
+
             //printf(">> y[%d] = %g * %g\n", my_row_ind[i] - my_row_ind[0], my_val[i], x[my_col_ind[i]]);
         }
-        
+
         //printf("[p%d]: y: ", taskid);
         //print_array_double(my_y, num_rows_pp);
 
@@ -450,7 +450,7 @@ void print_array_double_result(double *array, size_t size)
 }
 
 /*	int readMtx( FILE *f )
-		Read .mtx files 
+		Read .mtx files
 		Returns the number of nonzero elems (directly)
 		Returns the row_ind, col_ind, val 	(indirecly)
  */
@@ -459,16 +459,16 @@ int readMtx( char filename[], int **Ii, int **Ji, double **vali, int *size )
     int ret_code;
     MM_typecode matcode;
     FILE *f;
-    
+
     int M, N;
-    int nz = 0;  
+    int nz = 0;
     int i;
     int *I, *J;
     double *val;
-    
+
 	// Read File
-         
-	if ((f = fopen(filename, "r")) == NULL) 
+
+	if ((f = fopen(filename, "r")) == NULL)
 		exit(1);
 
     if (mm_read_banner(f, &matcode) != 0)
@@ -476,18 +476,18 @@ int readMtx( char filename[], int **Ii, int **Ji, double **vali, int *size )
         printf("Could not process Matrix Market banner.\n");
         exit(1);
     }
-    
+
     /*  This is how one can screen matrix types if their application */
     /*  only supports a subset of the Matrix Market data types.      */
 
-    if (mm_is_complex(matcode) && mm_is_matrix(matcode) && 
+    if (mm_is_complex(matcode) && mm_is_matrix(matcode) &&
             mm_is_sparse(matcode) )
     {
         printf("Sorry, this application does not support ");
         printf("Market Market type: [%s]\n", mm_typecode_to_str(matcode));
         exit(1);
     }
-    
+
     /* find out size of sparse matrix .... */
 
     if ((ret_code = mm_read_mtx_crd_size(f, &M, &N, &nz)) !=0)
@@ -510,7 +510,7 @@ int readMtx( char filename[], int **Ii, int **Ji, double **vali, int *size )
         J[i]--;
     }
 
-    if (f !=stdin) 
+    if (f !=stdin)
     	fclose(f);
 
     /************************/
@@ -523,14 +523,11 @@ int readMtx( char filename[], int **Ii, int **Ji, double **vali, int *size )
     //    fprintf(stdout, "Lala : %d %d %20.19g\n", I[i]+1, J[i]+1, val[i]);
     //    fflush(stdout);
     //}
-    
+
     *Ii = I;
     *Ji = J;
-    *vali = val; 
+    *vali = val;
 	*size = N;
-	 
+
 	return nz;
 }
-
-
-
