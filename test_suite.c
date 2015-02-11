@@ -136,8 +136,8 @@ void parallel_tests(int numtasks, int argc, char *argv[])
         //char filename[] = "./arrays/fidapm11_edited.mtx";
         //char filename[] = "./arrays/utm300.mtx";
         //char filename[] = ".arrays/bcsstk30.mtx";
-        char filename[] = "./arrays/utm3060.mtx";
-        //char filename[] = "./arrays/conf6_0_00l8x8_8000.mtx";
+        //char filename[] = "./arrays/utm3060.mtx";
+        char filename[] = "./arrays/conf6_0_00l8x8_8000.mtx";
         //char filename[] = "./arrays/jumper_start.mtx";
 
 		/* Information to be returned
