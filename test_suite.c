@@ -121,13 +121,18 @@ void parallel_tests(int numtasks, int argc, char *argv[])
 	/************************* Master task only *******************************/
     if (taskid == MASTER) {
     	// ======================  TEST CASES  ================================
-        
+
         // ===================== .mtx format read =============================
 		// input .mtx file name
-        char filename[] = "./arrays/matrix_test.mtx";//"fidapm11.mtx" ;
-        
+        //char filename[] = "./arrays/matrix_test.mtx";
+        //char filename[] = "./arrays/fidapm11.mtx";
+        //char filename[] = "./arrays/utm300.mtx";
+        //char filename[] = "./arrays/utm3060.mtx";
+        //char filename[] = "./arrays/conf6_0_00l8x8_8000.mtx";
+        char filename[] = ".arrays/bcsstk30.mtx";
+
 		/* Information to be returned
-			I: row_ind 
+			I: row_ind
 			J: col_ind
 		 	val: array values
 		 	nz: number of non-zero elements.
@@ -139,39 +144,41 @@ void parallel_tests(int numtasks, int argc, char *argv[])
 
         nnz = readMtx(filename, &I, &J, &vall, &size);
         printf("Number of Non-zero elements %d\n",nnz);
-        
+
+        /*
         for (int i=0; i < nnz; i++){
     		fprintf(stdout, "P0 input : %d %d %20.19g\n", I[i] + 1, J[i] + 1, vall[i]);
     	}
     	fflush(stdout);
+*/
+		/*	COO Format characteristics	*/
+		printf("The size of the matrix is: %d\n", size);
 
-		/*	COO Format characteristics	*/ 
-		printf ("The size of the matrix is: %d\n",size);
-		
-		int *row_ind, *col_ind; 
+		int *row_ind, *col_ind;
 		double *val;
-		row_ind = I;
-		col_ind = J;
+		row_ind = J;
+		col_ind = I;
 		val = vall;
-		
-		for (int i=0; i < nnz; i++){
+
+		for (int i = 0; i < nnz; i++){
 			row_ind[i] = row_ind[i] + 1;
 			col_ind[i] = col_ind[i] + 1;
     	}
-		
-		/*x = malloc(nnz*sizeof(double));
-		
+
+		x = malloc(size*sizeof(double));
+
 		// initialize array x
 		srand(time(NULL));
-		for (int i=0; i < nnz; i++){
+		for (size_t i = 0; i < (size_t)size; i++){
+			//x[i] = rand() % RRANGE + 1.0;
 			x[i] = rand() % RRANGE + 1.0;
-		} */
-		/*	COO Format characteristics	*/ 
-		
-		double x_[8]     = { 1., 3.,  6.,  2., 1., 0.,  5.,  3.};
-		
-		x = x_;
-		
+		}
+		/*	COO Format characteristics	*/
+
+		//double x_[8]     = { 1., 3.,  6.,  2., 1., 0.,  5.,  3.};
+		//x = x_;
+        printf("Alles Gut\n");
+
     	// ======================  TEST CASES  ================================
 
 		/* N (size of array) must be divisible by number of tasks */
@@ -187,7 +194,7 @@ void parallel_tests(int numtasks, int argc, char *argv[])
         printf("[info]: p0 is MASTER process.\n");
 
 		/* -----------   START OF PROCESS DATA INITIALIZATION   ----------- */
-    	
+
     	int dest = 0;
         int from = 0;
         int divisor = num_rows_pp;
@@ -195,7 +202,7 @@ void parallel_tests(int numtasks, int argc, char *argv[])
         size_t temp_chunksize = 0;
 
         /* Send each task its portion of the array - master keeps 1st part */
-        for (size_t i = 0; i < nnz; i++) {
+        for (size_t i = 0; i < (size_t)nnz; i++) {
 
         	product = row_ind[i] / divisor;
 
@@ -244,7 +251,7 @@ void parallel_tests(int numtasks, int argc, char *argv[])
                     print_array_double(&x[0], size);
 
 				}
-                
+
                 // ====== next iteration ======
                 from = i;
 
@@ -462,7 +469,7 @@ void print_array_int(int *array, size_t size)
 }
 
 /*	int readMtx( FILE *f )
-		Read .mtx files 
+		Read .mtx files
 		Returns the number of nonzero elems (directly)
 		Returns the row_ind, col_ind, val 	(indirecly)
  */
@@ -471,16 +478,16 @@ int readMtx( char filename[], int **Ii, int **Ji, double **vali, int *size )
     int ret_code;
     MM_typecode matcode;
     FILE *f;
-    
+
     int M, N;
-    int nz = 0;  
+    int nz = 0;
     int i;
     int *I, *J;
     double *val;
-    
-	// Read File
-         
-	if ((f = fopen(filename, "r")) == NULL) 
+
+    // Read File
+
+	if ((f = fopen(filename, "r")) == NULL)
 		exit(1);
 
     if (mm_read_banner(f, &matcode) != 0)
@@ -488,18 +495,18 @@ int readMtx( char filename[], int **Ii, int **Ji, double **vali, int *size )
         printf("Could not process Matrix Market banner.\n");
         exit(1);
     }
-    
+
     /*  This is how one can screen matrix types if their application */
     /*  only supports a subset of the Matrix Market data types.      */
 
-    if (mm_is_complex(matcode) && mm_is_matrix(matcode) && 
+    if (mm_is_complex(matcode) && mm_is_matrix(matcode) &&
             mm_is_sparse(matcode) )
     {
         printf("Sorry, this application does not support ");
         printf("Market Market type: [%s]\n", mm_typecode_to_str(matcode));
         exit(1);
     }
-    
+
     /* find out size of sparse matrix .... */
 
     if ((ret_code = mm_read_mtx_crd_size(f, &M, &N, &nz)) !=0)
@@ -522,7 +529,7 @@ int readMtx( char filename[], int **Ii, int **Ji, double **vali, int *size )
         J[i]--;
     }
 
-    if (f !=stdin) 
+    if (f !=stdin)
     	fclose(f);
 
     /************************/
@@ -535,14 +542,11 @@ int readMtx( char filename[], int **Ii, int **Ji, double **vali, int *size )
     //    fprintf(stdout, "Lala : %d %d %20.19g\n", I[i]+1, J[i]+1, val[i]);
     //    fflush(stdout);
     //}
-    
+
     *Ii = I;
     *Ji = J;
-    *vali = val; 
+    *vali = val;
 	*size = N;
-	 
+
 	return nz;
 }
-
-
-
