@@ -8,6 +8,7 @@
 #include <time.h>
 #include "mpi.h"
 #include "mmio.h"
+#include <time.h>
 
 
 #define ACCURACY 14
@@ -123,6 +124,12 @@ void parallel_tests(int numtasks, int argc, char *argv[])
     if (taskid == MASTER) {
     	// ======================  TEST CASES  ================================
 
+        clock_t t_total;
+        t_total = clock();
+
+        clock_t t;
+        t = clock();
+
         // ===================== .mtx format read =============================
 		// input .mtx file name
         //char filename[] = "./arrays/matrix_test.mtx";
@@ -151,7 +158,7 @@ void parallel_tests(int numtasks, int argc, char *argv[])
     		fprintf(stdout, "P0 input : %d %d %20.19g\n", I[i] + 1, J[i] + 1, vall[i]);
     	}
     	fflush(stdout);
-*/
+        */
 		/*	COO Format characteristics	*/
 		printf("The size of the matrix is: %d\n", size);
 
@@ -166,21 +173,25 @@ void parallel_tests(int numtasks, int argc, char *argv[])
 			col_ind[i] = col_ind[i] + 1;
     	}
 
-		x = malloc(size*sizeof(double));
+		x = malloc(size * sizeof(double));
 
 		// initialize array x
 		srand(time(NULL));
 		for (size_t i = 0; i < (size_t)size; i++){
-			//x[i] = rand() % RRANGE + 1.0;
 			x[i] = rand() % RRANGE + 1.0;
 		}
 		/*	COO Format characteristics	*/
 
 		//double x_[8]     = { 1., 3.,  6.,  2., 1., 0.,  5.,  3.};
 		//x = x_;
-        printf("Alles Gut\n");
+
+        t = clock() - t;
+        printf("[========= 100%% =========] Matrix read. (%g sec)\n",
+                ((float)t)/CLOCKS_PER_SEC);
 
     	// ======================  TEST CASES  ================================
+
+        t = clock();
 
 		/* N (size of array) must be divisible by number of tasks */
         if (size % numtasks != 0) {
@@ -226,30 +237,42 @@ void parallel_tests(int numtasks, int argc, char *argv[])
 
                     /* send META info like chunksize and number of rows per process */
 		            MPI_Send(&num_rows_pp, 1, MPI_INT, dest, tag0, MPI_COMM_WORLD);
+#ifdef DEBUG
                     printf("[comm@%s](p0 --> p%d) num_rows_pp : %d\n", __TIME__, dest, num_rows_pp);
+#endif
 
 		            MPI_Send(&chunksize, 1, MPI_INT, dest, tag1, MPI_COMM_WORLD);
+#ifdef DEBUG
                     printf("[comm@%s](p0 --> p%d) chunksize : %zd\n", __TIME__, dest, chunksize);
+#endif
 
 		            if (chunksize > 0) {
 		            	MPI_Send(&val[from], chunksize, MPI_DOUBLE, dest, tag2, MPI_COMM_WORLD);
+#ifdef DEBUG
                         printf("[comm@%s](p0 --> p%d) val : ", __TIME__, dest);
                         print_array_double(&val[from], chunksize);
+#endif
 
 		            	MPI_Send(&row_ind[from], chunksize, MPI_INT, dest, tag3, MPI_COMM_WORLD);
+#ifdef DEBUG
                         printf("[comm@%s](p0 --> p%d) row_ind : ", __TIME__, dest);
                         print_array_int(row_ind+from, chunksize);
+#endif
 
 		            	MPI_Send(&col_ind[from], chunksize, MPI_INT, dest, tag4, MPI_COMM_WORLD);
+#ifdef DEBUG
                         printf("[comm@%s](p0 --> p%d) col_ind : ", __TIME__, dest);
                         print_array_int(col_ind+from, chunksize);
+#endif
 		            }
 
 		            /* distribute vector x ---->> EDIT distribute whole vector*/
                     MPI_Send(&x[0], size, MPI_DOUBLE,
                              dest, tag5, MPI_COMM_WORLD);
+#ifdef DEBUG
                     printf("[comm@%s](p0 --> p%d) x : ", __TIME__, dest);
                     print_array_double(&x[0], size);
+#endif
 
 				}
 
@@ -274,79 +297,87 @@ void parallel_tests(int numtasks, int argc, char *argv[])
             size_t chunksize = nnz - from;
 
             MPI_Send(&num_rows_pp, 1, MPI_INT, dest, tag0, MPI_COMM_WORLD);
+#ifdef DEBUG
             printf("[comm@%s](p0 --> p%d) num_rows_pp : %d\n", __TIME__, dest, num_rows_pp);
+#endif
             MPI_Send(&chunksize, 1, MPI_INT, dest, tag1, MPI_COMM_WORLD);
+#ifdef DEBUG
             printf("[comm@%s](p0 --> p%d) chunksize : %zd\n", __TIME__, dest, chunksize);
+#endif
 
             if (chunksize > 0) {
                 MPI_Send(&val[from], chunksize, MPI_DOUBLE, dest, tag2, MPI_COMM_WORLD);
+#ifdef DEBUG
                 printf("[comm@%s](p0 --> p%d) val : ", __TIME__, dest);
                 print_array_double(&val[from], chunksize);
+#endif
 
                 MPI_Send(&row_ind[from], chunksize, MPI_INT, dest, tag3, MPI_COMM_WORLD);
+#ifdef DEBUG
                 printf("[comm@%s](p0 --> p%d) row_ind : ", __TIME__, dest);
                 print_array_int(row_ind+from, chunksize);
+#endif
 
                 MPI_Send(&col_ind[from], chunksize, MPI_INT, dest, tag4, MPI_COMM_WORLD);
+#ifdef DEBUG
                 printf("[comm@%s](p0 --> p%d) col_ind : ", __TIME__, dest);
                 print_array_int(col_ind+from, chunksize);
+#endif
             }
 
             /* distribute vector x ---->> EDITED */
             MPI_Send(&x[0], size, MPI_DOUBLE, dest, tag5, MPI_COMM_WORLD);
+#ifdef DEBUG
             printf("[comm@%s](p0 --> p%d) x : ", __TIME__, dest);
             print_array_double(&x[0], size);
+#endif
         }
 
         size_t chunksize = temp_chunksize;
+
+
+        t = clock() - t;
+        printf("[========= 100%% =========] Data distribution & sent it. (%g sec)\n",
+                ((float)t)/CLOCKS_PER_SEC);
+
         /* ------------   END OF PROCESS DATA INITIALIZATION   ------------ */
 
-
-        /* -------   START OF REORDERING THE DATA TO LOCAL/GLOBAL   ------- */
-
-        // Generally the process p will have locally the
-        // [p*num_rows_pp, p*num_rows_pp+num_rows_pp) columns
-        printf("[p%d]: My private area is the block [(%d,%d), (%d,%d)]\n",
-               taskid, taskid*num_rows_pp, taskid*num_rows_pp,
-               taskid*num_rows_pp+num_rows_pp, taskid*num_rows_pp+num_rows_pp);
-
-        int private_from = taskid * num_rows_pp;
-        int private_to   = taskid * num_rows_pp + num_rows_pp;
-
-        printf("[p%d]: private{ ", taskid);
-        for (int i = 0; i < num_rows_pp; i++) {
-            printf("%g(%d, %d), ", val[i], row_ind[i], col_ind[i]);
-        }
-        puts("}");
-
-        /* --------   END OF REORDERING THE DATA TO LOCAL/GLOBAL   -------- */
+        t = clock();
 
         double y[size];
         memset(y, 0, size * sizeof(double));
 
         for (size_t i = 0; i < chunksize; i++) {
             y[row_ind[i]] += val[i] * x[col_ind[i]];
-            printf(">> y[%d] = %g * %g\n", row_ind[i], val[i], x[col_ind[i]]);
         }
+#ifdef DEBUG
         printf("[p0]: y: ");
         print_array_double(y, num_rows_pp);
+#endif
 
+        t = clock() - t;
+        printf("[========= 100%% =========] Calculated the local chunk. (%g sec)\n",
+                ((float)t)/CLOCKS_PER_SEC);
+
+        t = clock();
 
         /* Get final sum and print sample results */
         for (int i = 1; i < numtasks; i++) {
             MPI_Recv(&y[i*num_rows_pp], num_rows_pp, MPI_DOUBLE, i, tag6, MPI_COMM_WORLD, &status);
         }
 
+#ifdef DEBUG
         printf("[p0]: I'm master and I have the final result which lies in y: ");
         print_array_double_result(y, size);
+#endif
 
-		/*
-        if (vec_compare(y, y_sol, size)) {
-            puts("[TEST 1] *** SUCCESS ***");
-        } else {
-            puts("[TEST 1] !!! FAILURE !!!");
-        }
-        */
+        t = clock() - t;
+        printf("[========= 100%% =========] Received & assembled the final result. (%g sec)\n",
+                ((double)t)/CLOCKS_PER_SEC);
+
+        t_total = clock() - t_total;
+        printf("[========= 100%% =========] Overall execution. (%g sec)\n",
+                ((float)t_total)/CLOCKS_PER_SEC);
     }  /* end of master section */
 
     /********************** Non-master tasks only *****************************/
@@ -373,50 +404,37 @@ void parallel_tests(int numtasks, int argc, char *argv[])
         if (chunksize > 0){
             // Receive values array
         	MPI_Recv(&my_val, chunksize, MPI_DOUBLE, source, tag2, MPI_COMM_WORLD, &status);
+#ifdef DEBUG
 			printf("[comm@%s](p%d <-- p%d) val : ", __TIME__, taskid, source);
 			print_array_double(my_val, chunksize);
+#endif
 
             // Receive row indeces array
             MPI_Recv(&my_row_ind, chunksize, MPI_INT, source, tag3, MPI_COMM_WORLD, &status);
+#ifdef DEBUG
 			printf("[comm@%s](p%d <-- p%d) row_ind : ", __TIME__, taskid, source);
 			print_array_int(my_row_ind, chunksize);
+#endif
 
             // Receive column indeces array
 			MPI_Recv(&my_col_ind, chunksize, MPI_INT, source, tag4, MPI_COMM_WORLD, &status);
+#ifdef DEBUG
 			printf("[comm@%s](p%d <-- p%d) col_ind : ", __TIME__, taskid, source);
 			print_array_int(my_col_ind, chunksize);
+#endif
 
 		}
 
         /* receive portion of array x */
         x = malloc(num_rows_pp*numtasks*sizeof(double));
 		MPI_Recv(x, num_rows_pp*numtasks, MPI_DOUBLE, source, tag5, MPI_COMM_WORLD, &status);
+#ifdef DEBUG
 		printf("[comm@%s](p%d <-- p%d) x : ", __TIME__, taskid, source);
 		print_array_double(x, num_rows_pp*numtasks);
+#endif
         //
         /* ------------   END OF PROCESS DATA INITIALIZATION   ------------ */
 
-
-        /* -------   START OF REORDERING THE DATA TO LOCAL/GLOBAL   ------- */
-
-        // Generally the process p will have locally the
-        // [p*num_rows_pp, p*num_rows_pp+num_rows_pp) columns
-        printf("[p%d]: My private area is the block [(%d,%d), (%d,%d)]\n",
-               taskid, taskid*num_rows_pp, taskid*num_rows_pp,
-               taskid*num_rows_pp+num_rows_pp, taskid*num_rows_pp+num_rows_pp);
-
-        int private_from = taskid * num_rows_pp;
-        int private_to   = taskid * num_rows_pp + num_rows_pp;
-
-        printf("[p%d]: private{ ", taskid);
-        for (int i = private_from-private_from; i < private_to-private_from; i++) {
-            printf("%g(%d, %d), ", my_val[i], my_row_ind[i], my_col_ind[i]);
-        }
-        puts("}");
-
-
-
-        /* --------   END OF REORDERING THE DATA TO LOCAL/GLOBAL   -------- */
 
         double my_y[num_rows_pp];
         memset(my_y, 0, chunksize * sizeof(double));
@@ -424,8 +442,10 @@ void parallel_tests(int numtasks, int argc, char *argv[])
         for (size_t i = 0; i < (size_t)chunksize; i++) {
             my_y[my_row_ind[i] - num_rows_pp*taskid] += my_val[i] * x[my_col_ind[i]];
         }
+#ifdef DEBUG
         printf("[p%d]: y: ", taskid);
         print_array_double(my_y, num_rows_pp);
+#endif
 
         MPI_Send(my_y, num_rows_pp, MPI_DOUBLE, MASTER, tag6, MPI_COMM_WORLD);
 
