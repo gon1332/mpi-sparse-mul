@@ -121,12 +121,18 @@ void parallel_tests(int numtasks, int argc, char *argv[])
 	//double x[8]     = { 1., 3.,  6.,  2., 1., 0.,  5.,  3.};
 	/************************* Master task only *******************************/
     if (taskid == MASTER) {
+
+        clock_t t_total;
+        t_total = clock();
+
+        clock_t t;
+        t = clock();
     	// ======================  TEST CASES  ================================
 
         // ===================== .mtx format read =============================
 		// input .mtx file name
         //char filename[] = "./arrays/matrix_test.mtx";
-        char filename[] = "./arrays/utm_3060.mtx";
+        char filename[] = "./arrays/utm3060.mtx";
         //char filename[] = "./arrays/fidapm11_edited.mtx";
 
         /*
@@ -135,7 +141,7 @@ void parallel_tests(int numtasks, int argc, char *argv[])
         */
 
 		/* Information to be returned
-			I: row_ind 
+			I: row_ind
 			J: col_ind
 		 	val: array values
 		 	nz: number of non-zero elements.
@@ -145,43 +151,49 @@ void parallel_tests(int numtasks, int argc, char *argv[])
 		double *vall;
 		int size;
 
+        printf("About to read matrix.\n");
         nnz = readMtx(filename, &I, &J, &vall, &size);
         printf("--Number of Non-zero elements %d\n",nnz);
-        
+
         /* Print output matrix (optional) */
         /*for (int i=0; i < nnz; i++){
     		fprintf(stdout, "P0 input : %d %d %20.19g\n", I[i] + 1, J[i] + 1, vall[i]);
     	}
     	fflush(stdout);*/
 
-		/*	COO Format characteristics	*/ 
+		/*	COO Format characteristics	*/
 		printf ("--The size of the matrix is: %d\n",size);
-		
-		int *row_ind, *col_ind; 
+
+		int *row_ind, *col_ind;
 		double *val;
 		col_ind = I;
 		row_ind = J;
 		val = vall;
-		
+
 		for (int i=0; i < nnz; i++){
 			row_ind[i] = row_ind[i] + 1;
 			col_ind[i] = col_ind[i] + 1;
     	}
-		
+
 		// initialize array x
 		x = malloc(size*sizeof(double));
-		
+
 		srand(time(NULL));
 		for (int i=0; i < size; i++){
 			x[i] = 1.0; //rand() % RRANGE + 1.0;
 		}
-		/*	COO Format characteristics	*/ 
-		
+		/*	COO Format characteristics	*/
+
 		//double x_[8]     = { 1., 3.,  6.,  2., 1., 0.,  5.,  3.};
 		//x = x_;
-		
+
+        t = clock() - t;
+        printf("[========= 100%% =========] Matrix read. (%g sec)\n",
+                ((float)t)/CLOCKS_PER_SEC);
+
     	// ======================  TEST CASES  ================================
 
+        t = clock();
 		/* N (size of array) must be divisible by number of tasks */
         if ( size % numtasks != 0 ) {
             printf("[info]: Quitting. Number of MPI tasks must be divisible by size.\n");
@@ -190,25 +202,25 @@ void parallel_tests(int numtasks, int argc, char *argv[])
         }
 
 		/* -----------   START OF PROCESS DATA INITIALIZATION   ------------- */
-    	
+
 		/******************* ex3  ARRAY DISTRIBUTION START ********************/
-        
+
         int limit = nnz/numtasks;	/* NZ/p elements per process   */
         int cnz;					/* current num of non zero read*/
 		int current_row = 0;
 		int i = 0;
 		int *proc = malloc(numtasks*sizeof(int));
-	
+
 		int *total_elements = malloc(numtasks*sizeof(int));
 		for ( int j=0; j < numtasks; j++ ){
 			total_elements[j] = 0;
 			proc[j] = -1;
 		}
-		
+
 		int k = 0;
-		
+
 		while (current_row < size-1) {
-		
+
 			current_row = row_ind[i];
 			cnz = 0;
 			while ((i < nnz) && (row_ind[i] == current_row)){
@@ -216,7 +228,7 @@ void parallel_tests(int numtasks, int argc, char *argv[])
 				i += 1;
 			}
 			//printf("---Line %d has %d non zero elements ,\n",current_row, cnz);		//!!!!!!!!!!!!!!
-		
+
 			if (total_elements[k] + cnz <= limit ){
 				total_elements[k] += cnz;
 				proc[k] = current_row;
@@ -225,39 +237,39 @@ void parallel_tests(int numtasks, int argc, char *argv[])
 			k += 1;
 			if (k > numtasks - 1)
 				k -= 1;
-			
+
 			total_elements[k] += cnz;
 			proc[k] = current_row;
 			}
 		}
-		
+
 		// validate ---> print boundary_list (proc) and total_elements list
 		printf("Boundary List (proc). List will be split by lines: ");
 		print_array_int(proc, numtasks);
 		printf("\n----------------------------------------------\n");
 		printf("Total Elements List. Each process will have: ");
 		print_array_int(total_elements, numtasks);
-		printf(" elements \n -----------------------------------\n"); 
+		printf(" elements \n -----------------------------------\n");
 
 		/************** distribute elements to other processes ****************/
 		int prv_line = proc[0];
 		int elements_distributed = total_elements[0];
 		int elem = 0;
 		for (size_t i = 1; i < numtasks; i++){
-		
+
 			/* Send size N of matrix to other proc */
 			MPI_Send(&size, 1, MPI_INT, i, tagx, MPI_COMM_WORLD);
 			//printf("[comm@%s](p0 --> p%d) size N: %d\n", __TIME__, i, size);
-			
+
 			/* how many lines am i going to take? */
 			elem = proc[i] - prv_line;
 			MPI_Send(&elem, 1, MPI_INT, i, tag0, MPI_COMM_WORLD);
             //printf("[comm@%s](p0 --> p%d) num_rows_p : %d\n", __TIME__, i, (proc[i] - prv_line));
-			
+
 			/* how many elements am i sending? */
             MPI_Send(&total_elements[i], 1, MPI_INT, i, tag1, MPI_COMM_WORLD);
             //printf("[comm@%s](p0 --> p%d) chunksize : %zd\n", __TIME__, i, total_elements[i]);
-			
+
 			/* send the chunks of COO arrays (based on chunksize >> total_elements[i]) */
 			if (total_elements[i] > 0) {
             	MPI_Send(&val[elements_distributed], total_elements[i], MPI_DOUBLE, i, tag2, MPI_COMM_WORLD);
@@ -272,17 +284,24 @@ void parallel_tests(int numtasks, int argc, char *argv[])
                 //printf("[comm@%s](p0 --> p%d) col_ind : ", __TIME__, i);
                 //print_array_int(&col_ind[elements_distributed], total_elements[i]);
             }
-            
+
             /* distribute vector x ---->> EDIT distribute whole vector*/
             MPI_Send(&x[0], size, MPI_DOUBLE, i, tag5, MPI_COMM_WORLD);
             //printf("[comm@%s](p0 --> p%d) x : ", __TIME__, i);
             //print_array_double(&x[0], size);
-            
+
 			/* for next iteration: */
 			elements_distributed += total_elements[i];
 			prv_line = proc[i];
 		}
+        t = clock() - t;
+        printf("[========= 100%% =========] Data distribution and send. (%g sec)\n",
+                ((float)t)/CLOCKS_PER_SEC);
+
+
 		/******************* ex3  ARRAY DISTRIBUTION END *********************/
+
+        t = clock();
 
 		/* Compute multiplication result y */
 		// locally
@@ -291,39 +310,42 @@ void parallel_tests(int numtasks, int argc, char *argv[])
 
         for (size_t i = 0; i < total_elements[0]; i++) {
             y[row_ind[i]] += val[i] * x[col_ind[i]];
-        
-        	//printf(">> y[%d] = %g * %g\n", row_ind[i], val[i], x[col_ind[i]]);
-            
         }
+
+        t = clock() - t;
+        printf("[========= 100%% =========] Local computation. (%g sec)\n",
+                ((float)t)/CLOCKS_PER_SEC);
         //printf("[p0]: y: ");
         //print_array_double(y, proc[0] + 1);
 
+        t = clock();
         /* Get final sum and print sample results */
         prv_line = proc[0];
-        /* Receiving strategy 
+        /* Receiving strategy
          	Since every process has a different chunksize and handles different
          	types of rows for every process i :
-         	we start receiving on the line prv_line = proc[i-1] and we receive 
+         	we start receiving on the line prv_line = proc[i-1] and we receive
          	that many elements as the difference of the 1st line that p[i] has
          	substracted by the last line that p[i] has, namely proc[i+1] - proc[i]
          */
         for (int i = 1; i < numtasks; i++) {
-        	
+
             MPI_Recv(&y[prv_line+1], (proc[i] - prv_line), MPI_DOUBLE, i, tag6, MPI_COMM_WORLD, &status);
             prv_line = proc[i];
         }
 
+#ifdef DEBUG
         printf("[p0]: I'm master and I have the final result which lies in y: ");
         print_array_double_result(y, size);
+#endif
 
-		/* Validate results */
-		/*
-        if (vec_compare(y, y_sol, size)) {
-            puts("[TEST 1] *** SUCCESS ***");
-        } else {
-            puts("[TEST 1] !!! FAILURE !!!");
-        }
-        */
+        t = clock() - t;
+        printf("[========= 100%% =========] Gather the final result. (%g sec)\n",
+                ((float)t)/CLOCKS_PER_SEC);
+
+        t_total = clock() - t_total;
+        printf("[========= 100%% =========] Gather the final result. (%g sec)\n",
+                ((float)t_total)/CLOCKS_PER_SEC);
     }	/* end of master section */
 
     /********************** Non-master tasks only *****************************/
